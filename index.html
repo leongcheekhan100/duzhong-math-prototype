@@ -1,0 +1,2635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>独中数学 DuZhong Math</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+/* ===== CSS Reset & Variables ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #D97757;
+  --primary-light: #E8956F;
+  --primary-dark: #C4623F;
+  --bg: #FAF9F7;
+  --surface: #FFFFFF;
+  --text: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --border: #E8E5E0;
+  --success: #2D8A4E;
+  --success-light: #E6F4EC;
+  --danger: #D94444;
+  --danger-light: #FDECEC;
+  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radius-card: 16px;
+  --radius-btn: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body {
+  font-family: var(--font);
+  background: #E8E5E0;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ===== Device Frame ===== */
+.device-frame {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  max-height: 932px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 431px) {
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .device-frame {
+    border-radius: 40px;
+    border: 8px solid #1A1A1A;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    height: min(90vh, 900px);
+  }
+}
+
+/* ===== Status Bar ===== */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 24px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg);
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* ===== Main Content Area ===== */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* ===== Screen Views ===== */
+.screen {
+  display: none;
+  padding: 0 20px 20px;
+  animation: fadeIn 0.3s ease;
+  min-height: 100%;
+}
+.screen.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+@keyframes growTree {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes xpPop {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-40px) scale(1); opacity: 0; }
+}
+
+@keyframes correctFlash {
+  0% { background: var(--success-light); }
+  50% { background: #c8f0d5; }
+  100% { background: var(--success-light); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+@keyframes scanLine {
+  0% { top: 0; }
+  100% { top: calc(100% - 2px); }
+}
+
+@keyframes timerPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,87,0.3); }
+  50% { box-shadow: 0 0 0 15px rgba(217,119,87,0); }
+}
+
+/* ===== Bottom Navigation ===== */
+.bottom-nav {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 6px 8px 0;
+  padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px);
+  flex-shrink: 0;
+  z-index: 200;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  background: none;
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.nav-item .nav-icon { font-size: 22px; transition: var(--transition); }
+.nav-item .nav-label { font-size: 10px; color: var(--text-secondary); transition: var(--transition); font-weight: 500; }
+.nav-item.active .nav-icon { transform: scale(1.1); }
+.nav-item.active .nav-label { color: var(--primary); font-weight: 600; }
+
+.nav-item.scan-btn {
+  position: relative;
+  top: -14px;
+}
+.nav-item.scan-btn .nav-icon {
+  width: 52px;
+  height: 52px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 16px rgba(217,119,87,0.35);
+  transition: var(--transition);
+}
+.nav-item.scan-btn:active .nav-icon { transform: scale(0.92); }
+.nav-item.scan-btn .nav-label { margin-top: 4px; }
+
+/* ===== Common Components ===== */
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.section-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+.card:hover { box-shadow: var(--shadow-lg); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-outline:hover { background: rgba(217,119,87,0.08); }
+
+.btn-block { width: 100%; }
+
+.progress-bar-bg {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ===== SCREEN 1: HOME ===== */
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-top: 8px;
+}
+.greeting { font-size: 26px; font-weight: 700; line-height: 1.3; }
+.greeting-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+.lang-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+.lang-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+.streak-xp-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.streak-card, .xp-card {
+  flex: 1;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.streak-value { font-size: 28px; font-weight: 800; color: var(--primary); }
+.streak-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+.xp-level { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.xp-numbers { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+.recommended-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  color: white;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(217,119,87,0.25);
+  position: relative;
+  overflow: hidden;
+}
+.recommended-card::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+.recommended-label { font-size: 11px; opacity: 0.85; margin-bottom: 4px; font-weight: 500; }
+.recommended-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.recommended-sub { font-size: 13px; opacity: 0.85; }
+.recommended-btn {
+  margin-top: 14px;
+  background: white;
+  color: var(--primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-btn);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.recommended-btn:active { transform: scale(0.96); }
+
+.weak-section { margin-bottom: 20px; }
+
+.weak-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.weak-item:last-child { border-bottom: none; }
+.weak-icon { font-size: 20px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #FFF3EE; border-radius: 10px; }
+.weak-info { flex: 1; }
+.weak-name { font-size: 14px; font-weight: 600; }
+.weak-name-en { font-size: 11px; color: var(--text-secondary); }
+.weak-pct { font-size: 13px; font-weight: 700; color: var(--primary); min-width: 40px; text-align: right; }
+
+.quick-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.quick-actions .btn { flex: 1; font-size: 13px; padding: 14px 12px; }
+
+/* ===== SCREEN 2: PRACTICE ===== */
+.practice-header {
+  padding-top: 8px;
+  margin-bottom: 16px;
+}
+.practice-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.practice-sub { font-size: 13px; color: var(--text-secondary); }
+
+.exam-tabs {
+  display: flex;
+  background: var(--surface);
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--border);
+  padding: 3px;
+  margin-bottom: 14px;
+}
+.exam-tab {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-secondary);
+  border: none;
+  background: none;
+  font-family: var(--font);
+}
+.exam-tab.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(217,119,87,0.25);
+}
+
+.grade-select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text);
+  margin-bottom: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236B6B6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  cursor: pointer;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.topic-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.topic-card:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); }
+.topic-card:active { transform: scale(0.97); }
+
+.topic-emoji { font-size: 28px; margin-bottom: 8px; }
+.topic-name { font-size: 14px; font-weight: 700; line-height: 1.3; }
+.topic-name-en { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
+.topic-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.topic-questions { font-size: 11px; color: var(--text-secondary); }
+.topic-mastery { font-size: 11px; font-weight: 700; }
+
+.mock-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #1A1A1A, #333);
+  color: white;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  margin-bottom: 10px;
+}
+.mock-btn:active { transform: scale(0.97); }
+.mock-sub { font-size: 11px; font-weight: 400; opacity: 0.7; display: block; margin-top: 4px; }
+
+/* ===== SCREEN 3: QUESTION VIEW ===== */
+.question-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+.question-back {
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  border: none;
+  background: none;
+}
+.question-progress-text { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+.question-close { font-size: 18px; cursor: pointer; padding: 4px; border: none; background: none; }
+
+.question-progress-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.question-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.question-topic-tag {
+  display: inline-block;
+  padding: 5px 12px;
+  background: #FFF3EE;
+  color: var(--primary);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.question-box {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.question-number { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; }
+.question-text { font-size: 16px; font-weight: 600; line-height: 1.6; }
+.question-math {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  padding: 16px 0;
+  color: var(--primary-dark);
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+.options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+.option-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+.option-card:hover { border-color: var(--primary); }
+.option-card:active { transform: scale(0.98); }
+.option-card.selected { border-color: var(--primary); background: #FFF3EE; }
+.option-card.correct { border-color: var(--success); background: var(--success-light); }
+.option-card.incorrect { border-color: var(--danger); background: var(--danger-light); animation: shake 0.4s ease; }
+
+.option-letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.option-card.selected .option-letter { background: var(--primary); color: white; }
+.option-card.correct .option-letter { background: var(--success); color: white; }
+.option-card.incorrect .option-letter { background: var(--danger); color: white; }
+
+.option-text { font-size: 15px; font-weight: 500; }
+
+.scan-answer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-btn);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  margin-bottom: 16px;
+}
+.scan-answer-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Feedback Panel */
+.feedback-panel {
+  display: none;
+  border-radius: var(--radius-card);
+  padding: 20px;
+  margin-bottom: 16px;
+  animation: slideUp 0.4s ease;
+}
+.feedback-panel.show { display: block; }
+.feedback-panel.correct { background: var(--success-light); border: 1px solid #b5dfc5; }
+.feedback-panel.incorrect { background: var(--danger-light); border: 1px solid #f5c4c4; }
+
+.feedback-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.feedback-banner.correct { color: var(--success); }
+.feedback-banner.incorrect { color: var(--danger); }
+
+.feedback-explanation {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.feedback-step { margin-bottom: 6px; }
+.feedback-step strong { color: var(--text); }
+
+.feedback-actions { display: flex; gap: 8px; }
+.feedback-actions .btn { flex: 1; font-size: 12px; padding: 10px 12px; }
+
+.xp-badge {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary);
+  pointer-events: none;
+  z-index: 999;
+  animation: xpPop 1s ease forwards;
+}
+.xp-badge.show { display: block; }
+
+.next-btn-row { margin-top: 12px; }
+
+/* ===== SCREEN 4: CAMERA/SCAN ===== */
+.scan-screen {
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #000;
+  position: relative;
+}
+.scan-screen.active { display: flex !important; }
+
+.scan-viewfinder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  overflow: hidden;
+}
+
+.scan-guide {
+  width: 280px;
+  height: 180px;
+  border: 2px dashed rgba(255,255,255,0.5);
+  border-radius: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scan-guide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+  animation: scanLine 2s ease-in-out infinite alternate;
+}
+
+.scan-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--primary);
+  border-style: solid;
+}
+.scan-corner.tl { top: -1px; left: -1px; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
+.scan-corner.tr { top: -1px; right: -1px; border-width: 3px 3px 0 0; border-radius: 0 8px 0 0; }
+.scan-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 3px 3px; border-radius: 0 0 0 8px; }
+.scan-corner.br { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
+
+.scan-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  font-weight: 500;
+}
+.scan-hint-en { font-size: 11px; opacity: 0.6; margin-top: 4px; display: block; }
+
+.scan-controls {
+  background: #000;
+  padding: 20px 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.capture-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid white;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+}
+.capture-btn::after {
+  content: '';
+  position: absolute;
+  top: 5px; left: 5px; right: 5px; bottom: 5px;
+  background: white;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+.capture-btn:active::after { transform: scale(0.85); }
+
+.capture-label { color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 500; }
+
+.scan-close-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Scan Result */
+.scan-result {
+  display: none;
+  background: var(--bg);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  padding: 20px;
+  z-index: 5;
+  animation: slideUp 0.4s ease;
+}
+.scan-result.show { display: block; }
+
+.scan-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.scan-preview {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.scan-preview-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.scan-preview-math { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
+
+.scan-loading {
+  display: none;
+  text-align: center;
+  padding: 30px 0;
+}
+.scan-loading.show { display: block; }
+.scan-loading-text { font-size: 14px; color: var(--text-secondary); margin-top: 8px; }
+.scan-loading-dots { font-size: 24px; color: var(--primary); animation: pulse 1s infinite; }
+
+.scan-solution {
+  display: none;
+  animation: slideUp 0.4s ease;
+}
+.scan-solution.show { display: block; }
+
+.solution-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.solution-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.solution-step {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.solution-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.step-content { font-size: 14px; line-height: 1.7; }
+.step-math { font-weight: 600; color: var(--primary-dark); font-style: italic; }
+
+.scan-actions { display: flex; gap: 10px; }
+.scan-actions .btn { flex: 1; font-size: 13px; }
+
+/* ===== SCREEN 5: FOREST ===== */
+.forest-header {
+  padding-top: 8px;
+  margin-bottom: 16px;
+}
+.forest-title { font-size: 24px; font-weight: 700; }
+.forest-sub { font-size: 13px; color: var(--text-secondary); }
+
+.forest-display {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  overflow: hidden;
+  position: relative;
+  height: min(55vh, 450px);
+  background: #1A3A12;
+}
+
+#forestCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.forest-stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.forest-stat {
+  flex: 1;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  text-align: center;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.forest-stat-value { font-size: 22px; font-weight: 800; color: var(--primary); }
+.forest-stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+.timer-section {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.timer-display {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.timer-display.show { display: flex; }
+
+.timer-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 6px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: timerPulse 2s infinite;
+}
+.timer-circle-progress {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 140px;
+  height: 140px;
+}
+.timer-circle-progress circle {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 1s linear;
+}
+.timer-circle-bg { stroke: var(--border); }
+.timer-circle-fg { stroke: var(--primary); }
+
+.timer-time { font-size: 36px; font-weight: 800; color: var(--text); letter-spacing: 2px; }
+.timer-label-text { font-size: 12px; color: var(--text-secondary); }
+
+.timer-warning {
+  font-size: 12px;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.plant-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+.plant-btn:active { transform: scale(0.97); }
+.plant-btn.hidden { display: none; }
+
+.stop-btn {
+  padding: 10px 24px;
+  background: none;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+  border-radius: var(--radius-btn);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: var(--transition);
+}
+
+.together-btn {
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  border-radius: var(--radius-btn);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  margin-top: 10px;
+  transition: var(--transition);
+}
+
+.social-section {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.social-room {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #FFF3EE;
+  border-radius: var(--radius-btn);
+  margin-bottom: 12px;
+}
+.room-avatars { display: flex; }
+.room-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: white;
+  font-weight: 700;
+  margin-left: -6px;
+  border: 2px solid white;
+}
+.room-avatar:first-child { margin-left: 0; }
+.room-info { flex: 1; }
+.room-name { font-size: 13px; font-weight: 600; }
+.room-status { font-size: 11px; color: var(--text-secondary); }
+.room-actions { display: flex; gap: 8px; }
+.room-actions .btn { font-size: 11px; padding: 6px 12px; }
+
+.ranking-section { margin-bottom: 16px; }
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ranking-item:last-child { border-bottom: none; }
+.ranking-pos { font-size: 14px; font-weight: 800; color: var(--text-secondary); width: 20px; }
+.ranking-pos.gold { color: #E8A628; }
+.ranking-pos.silver { color: #94A3B8; }
+.ranking-pos.bronze { color: #C67F40; }
+.ranking-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.ranking-info { flex: 1; }
+.ranking-name { font-size: 14px; font-weight: 600; }
+.ranking-detail { font-size: 11px; color: var(--text-secondary); }
+.ranking-trees { font-size: 13px; font-weight: 700; color: var(--primary); }
+
+/* ===== SCREEN 6: PROFILE ===== */
+.profile-header {
+  text-align: center;
+  padding-top: 16px;
+  margin-bottom: 20px;
+}
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: white;
+  position: relative;
+}
+.profile-level-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: var(--primary);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 10px;
+  border: 2px solid var(--bg);
+}
+.profile-name { font-size: 22px; font-weight: 700; }
+.profile-school { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+.profile-stats {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.profile-stat {
+  flex: 1;
+  text-align: center;
+  padding: 14px 8px;
+  border-right: 1px solid var(--border);
+}
+.profile-stat:last-child { border-right: none; }
+.profile-stat-value { font-size: 20px; font-weight: 800; color: var(--primary); }
+.profile-stat-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+.profile-info-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.profile-info-card {
+  flex: 1;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.profile-info-label { font-size: 11px; color: var(--text-secondary); }
+.profile-info-value { font-size: 14px; font-weight: 700; margin-top: 4px; }
+
+.badges-section { margin-bottom: 20px; }
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.badge-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 14px 8px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: var(--transition);
+}
+.badge-card.locked { opacity: 0.45; filter: grayscale(0.6); }
+.badge-card.earned { border-color: #FDE68A; background: #FFFDF5; }
+.badge-emoji { font-size: 28px; margin-bottom: 6px; }
+.badge-name { font-size: 11px; font-weight: 600; line-height: 1.3; }
+.badge-name-en { font-size: 9px; color: var(--text-secondary); font-weight: 400; }
+
+.weak-report-section {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+.radar-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.radar-bar:last-child { margin-bottom: 0; }
+.radar-label { font-size: 12px; width: 70px; flex-shrink: 0; color: var(--text-secondary); font-weight: 500; }
+.radar-track { flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+.radar-fill { height: 100%; border-radius: 5px; transition: width 1s ease; }
+.radar-pct { font-size: 12px; font-weight: 700; width: 36px; text-align: right; }
+
+.settings-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: var(--transition);
+  margin-bottom: 20px;
+}
+.settings-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ===== Overlays ===== */
+.overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+  align-items: flex-end;
+  justify-content: center;
+}
+.overlay.show { display: flex; }
+
+.overlay-content {
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px;
+  width: 100%;
+  max-height: 80%;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+.overlay-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+/* Toast */
+.toast {
+  display: none;
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1A1A1A;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 999;
+  animation: slideUp 0.3s ease;
+  white-space: nowrap;
+}
+.toast.show { display: block; }
+</style>
+</head>
+<body>
+<div class="device-frame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="font-size:10px; letter-spacing:1px;">独中数学</span>
+    <span>📶 🔋</span>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="app-content" id="appContent">
+
+    <!-- ===== SCREEN 1: HOME ===== -->
+    <div class="screen active" id="screen-home">
+      <div class="home-header">
+        <div>
+          <div class="greeting">你好，Leon 👋</div>
+          <div class="greeting-sub">今天也要加油哦！Keep it up today!</div>
+        </div>
+        <button class="lang-toggle" onclick="toggleLang(this)">中/EN</button>
+      </div>
+
+      <div class="streak-xp-row">
+        <div class="streak-card">
+          <div class="streak-value">🔥 12</div>
+          <div class="streak-label">天连续 Day Streak</div>
+        </div>
+        <div class="xp-card">
+          <div class="xp-level">Level 8</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 62%; background: var(--primary);"></div>
+          </div>
+          <div class="xp-numbers">1,240 / 2,000 XP</div>
+        </div>
+      </div>
+
+      <div class="recommended-card" onclick="showQuestionView()">
+        <div class="recommended-label">📖 今日推荐练习 Today's Recommended</div>
+        <div class="recommended-title">二次方程</div>
+        <div class="recommended-sub">Quadratic Equations · 10 题 questions</div>
+        <button class="recommended-btn" onclick="event.stopPropagation(); showQuestionView();">开始练习 Start →</button>
+      </div>
+
+      <div class="weak-section">
+        <div class="section-title">⚠️ 弱点分析 <span class="section-subtitle">Weak Points</span></div>
+        <div class="card">
+          <div class="weak-item">
+            <div class="weak-icon">📐</div>
+            <div class="weak-info">
+              <div class="weak-name">几何</div>
+              <div class="weak-name-en">Geometry</div>
+            </div>
+            <div class="weak-pct">45%</div>
+          </div>
+          <div style="padding: 0 0 8px;">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:45%; background: var(--primary);"></div></div>
+          </div>
+          <div class="weak-item">
+            <div class="weak-icon">🎲</div>
+            <div class="weak-info">
+              <div class="weak-name">概率与统计</div>
+              <div class="weak-name-en">Probability & Statistics</div>
+            </div>
+            <div class="weak-pct">32%</div>
+          </div>
+          <div style="padding: 0 0 8px;">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:32%; background: var(--danger);"></div></div>
+          </div>
+          <div class="weak-item">
+            <div class="weak-icon">📈</div>
+            <div class="weak-info">
+              <div class="weak-name">微积分</div>
+              <div class="weak-name-en">Calculus</div>
+            </div>
+            <div class="weak-pct">58%</div>
+          </div>
+          <div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:58%; background: var(--primary);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="btn btn-primary" onclick="switchTab(1)">📝 开始练习<br><span style="font-size:11px;opacity:0.8;">Start Practice</span></button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 2: PRACTICE HUB ===== -->
+    <div class="screen" id="screen-practice">
+      <div class="practice-header">
+        <div class="practice-title">练习中心</div>
+        <div class="practice-sub">Practice Hub — 选择你的练习 Choose your practice</div>
+      </div>
+
+      <div class="exam-tabs">
+        <button class="exam-tab active" onclick="setExamTab(this)">期中考<br><span style="font-size:10px;opacity:0.7;">Midterm</span></button>
+        <button class="exam-tab" onclick="setExamTab(this)">期末考<br><span style="font-size:10px;opacity:0.7;">Final</span></button>
+        <button class="exam-tab" onclick="setExamTab(this)">统考<br><span style="font-size:10px;opacity:0.7;">UEC</span></button>
+      </div>
+
+      <select class="grade-select">
+        <option>初一 Junior 1</option>
+        <option>初二 Junior 2</option>
+        <option>初三 Junior 3</option>
+        <option selected>高一 Senior 1</option>
+        <option>高二 Senior 2</option>
+        <option>高三 Senior 3</option>
+      </select>
+
+      <div class="topic-grid">
+        <div class="topic-card" onclick="showQuestionView()">
+          <div class="topic-emoji">🔢</div>
+          <div class="topic-name">代数<div class="topic-name-en">Algebra</div></div>
+          <div class="topic-meta">
+            <span class="topic-questions">120 题</span>
+            <span class="topic-mastery" style="color:var(--success);">78%</span>
+          </div>
+          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:78%; background: var(--success);"></div></div>
+        </div>
+
+        <div class="topic-card" onclick="showQuestionView()">
+          <div class="topic-emoji">📐</div>
+          <div class="topic-name">几何<div class="topic-name-en">Geometry</div></div>
+          <div class="topic-meta">
+            <span class="topic-questions">95 题</span>
+            <span class="topic-mastery" style="color:var(--primary);">45%</span>
+          </div>
+          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:45%; background: var(--primary);"></div></div>
+        </div>
+
+        <div class="topic-card" onclick="showQuestionView()">
+          <div class="topic-emoji">📊</div>
+          <div class="topic-name">三角函数<div class="topic-name-en">Trigonometry</div></div>
+          <div class="topic-meta">
+            <span class="topic-questions">80 题</span>
+            <span class="topic-mastery" style="color:var(--success);">67%</span>
+          </div>
+          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:67%; background: var(--success);"></div></div>
+        </div>
+
+        <div class="topic-card" onclick="showQuestionView()">
+          <div class="topic-emoji">🎲</div>
+          <div class="topic-name">概率与统计<div class="topic-name-en">Probability & Stats</div></div>
+          <div class="topic-meta">
+            <span class="topic-questions">65 题</span>
+            <span class="topic-mastery" style="color:var(--danger);">32%</span>
+          </div>
+          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:32%; background: var(--danger);"></div></div>
+        </div>
+
+        <div class="topic-card" onclick="showQuestionView()">
+          <div class="topic-emoji">📈</div>
+          <div class="topic-name">微积分<div class="topic-name-en">Calculus</div></div>
+          <div class="topic-meta">
+            <span class="topic-questions">55 题</span>
+            <span class="topic-mastery" style="color:var(--primary);">58%</span>
+          </div>
+          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:58%; background: var(--primary);"></div></div>
+        </div>
+
+        <div class="topic-card" onclick="showQuestionView()">
+          <div class="topic-emoji">✏️</div>
+          <div class="topic-name">二次方程<div class="topic-name-en">Quadratic Eq.</div></div>
+          <div class="topic-meta">
+            <span class="topic-questions">45 题</span>
+            <span class="topic-mastery" style="color:var(--primary);">52%</span>
+          </div>
+          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:52%; background: var(--primary);"></div></div>
+        </div>
+      </div>
+
+      <button class="mock-btn" onclick="showToast('模拟考即将开始 Mock exam starting...')">
+        📝 模拟考 Mock Exam
+        <span class="mock-sub">模拟真实考试环境 Simulate real exam conditions</span>
+      </button>
+    </div>
+
+    <!-- ===== SCREEN 3: QUESTION VIEW ===== -->
+    <div class="screen" id="screen-question">
+      <div class="question-header">
+        <button class="question-back" onclick="exitQuestionView()">←</button>
+        <span class="question-progress-text" id="qProgressText">题 3/10</span>
+        <button class="question-close" onclick="exitQuestionView()">✕</button>
+      </div>
+      <div class="question-progress-bar">
+        <div class="question-progress-fill" id="qProgressFill" style="width: 30%;"></div>
+      </div>
+
+      <div class="question-topic-tag">✏️ 二次方程 Quadratic Equations</div>
+
+      <div class="question-box">
+        <div class="question-number">第 3 题 Question 3</div>
+        <div class="question-text">解下列二次方程，求 x 的值：</div>
+        <div class="question-text" style="font-size:13px; color:var(--text-secondary); margin-top:2px;">Solve the following quadratic equation for x:</div>
+        <div class="question-math">x² + 5x + 6 = 0</div>
+      </div>
+
+      <div class="options-list" id="optionsList">
+        <div class="option-card" onclick="selectOption(this, false)" data-correct="false">
+          <div class="option-letter">A</div>
+          <div class="option-text">x = 2, x = 3</div>
+        </div>
+        <div class="option-card" onclick="selectOption(this, true)" data-correct="true">
+          <div class="option-letter">B</div>
+          <div class="option-text">x = -2, x = -3</div>
+        </div>
+        <div class="option-card" onclick="selectOption(this, false)" data-correct="false">
+          <div class="option-letter">C</div>
+          <div class="option-text">x = -1, x = -6</div>
+        </div>
+        <div class="option-card" onclick="selectOption(this, false)" data-correct="false">
+          <div class="option-letter">D</div>
+          <div class="option-text">x = 1, x = 6</div>
+        </div>
+      </div>
+
+      <div class="feedback-panel" id="feedbackPanel">
+        <div class="feedback-banner" id="feedbackBanner"></div>
+        <div class="feedback-explanation">
+          <div class="feedback-step"><strong>步骤 1 Step 1:</strong> 因式分解方程 Factor the equation</div>
+          <div class="feedback-step" style="padding-left:12px;">x² + 5x + 6 = (x + 2)(x + 3) = 0</div>
+          <div class="feedback-step" style="margin-top:6px;"><strong>步骤 2 Step 2:</strong> 令每个因子等于零 Set each factor to zero</div>
+          <div class="feedback-step" style="padding-left:12px;">x + 2 = 0 → x = -2</div>
+          <div class="feedback-step" style="padding-left:12px;">x + 3 = 0 → x = -3</div>
+          <div class="feedback-step" style="margin-top:6px;"><strong>答案 Answer:</strong> x = -2, x = -3 ✅</div>
+        </div>
+        <div class="feedback-actions">
+          <button class="btn btn-outline" onclick="showToast('AI助手已打开 AI Assistant opened')">🤖 问AI Ask AI</button>
+          <button class="btn btn-primary" onclick="nextQuestion()">下一题 Next →</button>
+        </div>
+      </div>
+
+      <div class="xp-badge" id="xpBadge">+15 XP ⭐</div>
+    </div>
+
+    <!-- ===== SCREEN 4: CAMERA/SCAN ===== -->
+    <div class="screen" id="screen-scan" style="padding: 20px;">
+      <div style="text-align:center; margin-bottom:24px;">
+        <div style="font-size:20px; font-weight:700;">📷 扫描数学题</div>
+        <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Scan Math Question</div>
+      </div>
+
+      <div id="scanUploadArea" style="background:var(--surface); border:2px dashed var(--border); border-radius:var(--radius-card); padding:40px 20px; text-align:center; cursor:pointer; transition:var(--transition);" onclick="capturePhoto()">
+        <div style="font-size:48px; margin-bottom:16px;">📸</div>
+        <div style="font-size:16px; font-weight:600; margin-bottom:6px;">拍照或上传数学题目</div>
+        <div style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">Take a photo or upload math question</div>
+        <button class="btn btn-primary" style="pointer-events:none;">拍照 Take Photo</button>
+      </div>
+
+      <div class="scan-result" id="scanResult">
+        <div class="scan-result-header">
+          <span style="font-size:18px; font-weight:700;">📷 扫描结果 Scan Result</span>
+          <button style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="resetScan()">✕</button>
+        </div>
+
+        <div class="scan-preview">
+          <div class="scan-preview-label">检测到的题目 Detected Question</div>
+          <div class="scan-preview-math">∫ (3x² + 2x) dx</div>
+        </div>
+
+        <div class="scan-loading" id="scanLoading">
+          <div class="scan-loading-dots">⏳</div>
+          <div class="scan-loading-text">AI正在分析... AI analyzing...</div>
+        </div>
+
+        <div class="scan-solution" id="scanSolution">
+          <div class="solution-card">
+            <div class="solution-title">💡 解题步骤 Solution Steps</div>
+            <div class="solution-step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                应用幂法则：∫ xⁿ dx = xⁿ⁺¹/(n+1)<br>
+                <span style="font-size:12px; color:var(--text-secondary);">Apply the power rule: ∫ xⁿ dx = xⁿ⁺¹/(n+1)</span>
+              </div>
+            </div>
+            <div class="solution-step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                ∫ 3x² dx = 3 · x³/3 = <span class="step-math">x³</span><br>
+                <span style="font-size:12px; color:var(--text-secondary);">Integrate the first term</span>
+              </div>
+            </div>
+            <div class="solution-step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                ∫ 2x dx = 2 · x²/2 = <span class="step-math">x²</span><br>
+                <span style="font-size:12px; color:var(--text-secondary);">Integrate the second term</span>
+              </div>
+            </div>
+            <div class="solution-step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                最终答案 Final Answer:<br>
+                <span class="step-math" style="font-size:18px;">x³ + x² + C</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="scan-actions">
+            <button class="btn btn-outline" onclick="showToast('AI助手已打开 AI chat opened')">🤖 问AI更多<br><span style="font-size:10px;">Ask AI more</span></button>
+            <button class="btn btn-primary" onclick="showToast('✅ 已保存 Saved to notes')">💾 保存到笔记<br><span style="font-size:10px;">Save to notes</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 5: FOREST ===== -->
+    <div class="screen" id="screen-forest">
+      <div class="forest-header">
+        <div class="forest-title">🌳 我的森林</div>
+        <div class="forest-sub">My Forest — 专注学习，种出一片森林</div>
+      </div>
+
+      <div class="forest-display" id="forestGardenContainer">
+        <canvas id="forestCanvas"></canvas>
+      </div>
+
+      <div class="forest-stats-row">
+        <div class="forest-stat">
+          <div class="forest-stat-value">4.5</div>
+          <div class="forest-stat-label">小时 本周学习<br>Hours This Week</div>
+        </div>
+        <div class="forest-stat">
+          <div class="forest-stat-value">89</div>
+          <div class="forest-stat-label">棵树 累计种树<br>Total Trees</div>
+        </div>
+      </div>
+
+      <div class="timer-section">
+        <div class="section-title" style="text-align:left;">⏱️ 专注时间 <span class="section-subtitle">Focus Timer</span></div>
+
+        <button class="plant-btn" id="plantBtn" onclick="startPlanting()">
+          🌱 开始种树 Plant a Tree
+        </button>
+
+        <div class="timer-display" id="timerDisplay">
+          <div class="timer-circle">
+            <svg class="timer-circle-progress" viewBox="0 0 140 140">
+              <circle class="timer-circle-bg" cx="70" cy="70" r="64"/>
+              <circle class="timer-circle-fg" id="timerCircleFg" cx="70" cy="70" r="64"
+                      stroke-dasharray="402" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-time" id="timerTime">25:00</div>
+            <div class="timer-label-text">剩余 remaining</div>
+          </div>
+          <div class="timer-warning">🥀 离开将导致树木枯萎 Leaving will kill your tree</div>
+          <button class="stop-btn" onclick="stopPlanting()">放弃 Give up</button>
+        </div>
+
+        <button class="together-btn" onclick="showToast('📨 邀请已发送 Invite sent!')">
+          👥 与朋友一起种 Plant Together
+        </button>
+      </div>
+
+      <div class="social-section">
+        <div class="section-title">👥 学习室 <span class="section-subtitle">Study Rooms</span></div>
+        <div class="social-room">
+          <div class="room-avatars">
+            <div class="room-avatar">L</div>
+            <div class="room-avatar" style="background:#5B8DEF;">M</div>
+            <div class="room-avatar" style="background:#2D8A4E;">S</div>
+          </div>
+          <div class="room-info">
+            <div class="room-name">Leon的学习室</div>
+            <div class="room-status">3人正在学习 3 studying</div>
+          </div>
+          <button class="btn btn-primary" style="font-size:11px; padding:6px 12px;" onclick="showToast('已加入学习室 Joined room!')">加入 Join</button>
+        </div>
+        <div class="room-actions">
+          <button class="btn btn-outline btn-block" style="font-size:12px;" onclick="showToast('学习室已创建 Room created!')">➕ 创建学习室 Create Room</button>
+        </div>
+      </div>
+
+      <div class="ranking-section">
+        <div class="section-title">🏆 本周排行 <span class="section-subtitle">Weekly Ranking</span></div>
+        <div class="card">
+          <div class="ranking-item">
+            <div class="ranking-pos gold">1</div>
+            <div class="ranking-avatar">🧑‍🎓</div>
+            <div class="ranking-info">
+              <div class="ranking-name">Ming Wei</div>
+              <div class="ranking-detail">12棵树 · 6.2小时</div>
+            </div>
+            <div class="ranking-trees">🌳 12</div>
+          </div>
+          <div class="ranking-item">
+            <div class="ranking-pos silver">2</div>
+            <div class="ranking-avatar">👩‍🎓</div>
+            <div class="ranking-info">
+              <div class="ranking-name">Siew Ling</div>
+              <div class="ranking-detail">10棵树 · 5.1小时</div>
+            </div>
+            <div class="ranking-trees">🌳 10</div>
+          </div>
+          <div class="ranking-item">
+            <div class="ranking-pos bronze">3</div>
+            <div class="ranking-avatar">🧑</div>
+            <div class="ranking-info">
+              <div class="ranking-name">Leon (你 You)</div>
+              <div class="ranking-detail">9棵树 · 4.5小时</div>
+            </div>
+            <div class="ranking-trees">🌳 9</div>
+          </div>
+          <div class="ranking-item">
+            <div class="ranking-pos">4</div>
+            <div class="ranking-avatar">👧</div>
+            <div class="ranking-info">
+              <div class="ranking-name">Jia Ying</div>
+              <div class="ranking-detail">7棵树 · 3.8小时</div>
+            </div>
+            <div class="ranking-trees">🌳 7</div>
+          </div>
+          <div class="ranking-item">
+            <div class="ranking-pos">5</div>
+            <div class="ranking-avatar">🧒</div>
+            <div class="ranking-info">
+              <div class="ranking-name">Zhi Hao</div>
+              <div class="ranking-detail">5棵树 · 2.5小时</div>
+            </div>
+            <div class="ranking-trees">🌳 5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 6: PROFILE ===== -->
+    <div class="screen" id="screen-profile">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          L
+          <div class="profile-level-badge">Lv.8</div>
+        </div>
+        <div class="profile-name">Leon</div>
+        <div class="profile-school">吉隆坡循人中学 Tsun Jin High School</div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-value">8</div>
+          <div class="profile-stat-label">Level 等级</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value">1,240</div>
+          <div class="profile-stat-label">XP 经验值</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value">🔥 12</div>
+          <div class="profile-stat-label">天连续 Streak</div>
+        </div>
+      </div>
+
+      <div class="profile-info-row">
+        <div class="profile-info-card">
+          <div class="profile-info-label">学校 School</div>
+          <div class="profile-info-value">循人中学</div>
+        </div>
+        <div class="profile-info-card">
+          <div class="profile-info-label">年级 Grade</div>
+          <div class="profile-info-value">高二 Senior 2</div>
+        </div>
+      </div>
+
+      <div class="badges-section">
+        <div class="section-title">🏅 成就徽章 <span class="section-subtitle">Achievements</span></div>
+        <div class="badge-grid">
+          <div class="badge-card earned">
+            <div class="badge-emoji">🏆</div>
+            <div class="badge-name">连续7天<div class="badge-name-en">7-Day Streak</div></div>
+          </div>
+          <div class="badge-card earned">
+            <div class="badge-emoji">📚</div>
+            <div class="badge-name">做了100题<div class="badge-name-en">100 Questions</div></div>
+          </div>
+          <div class="badge-card earned">
+            <div class="badge-emoji">🌳</div>
+            <div class="badge-name">种了50棵树<div class="badge-name-en">50 Trees</div></div>
+          </div>
+          <div class="badge-card earned">
+            <div class="badge-emoji">🎯</div>
+            <div class="badge-name">满分一次<div class="badge-name-en">Perfect Score</div></div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-emoji">🔥</div>
+            <div class="badge-name">连续30天<div class="badge-name-en">30-Day Streak</div></div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-emoji">💯</div>
+            <div class="badge-name">做了500题<div class="badge-name-en">500 Questions</div></div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-emoji">🌲</div>
+            <div class="badge-name">种了200棵树<div class="badge-name-en">200 Trees</div></div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-emoji">⚡</div>
+            <div class="badge-name">速度之王<div class="badge-name-en">Speed King</div></div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-emoji">🧠</div>
+            <div class="badge-name">数学大师<div class="badge-name-en">Math Master</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="weak-report-section">
+        <div class="section-title">📊 弱点报告 <span class="section-subtitle">Weak Point Report</span></div>
+        <div class="radar-bar">
+          <div class="radar-label">代数 Algebra</div>
+          <div class="radar-track"><div class="radar-fill" style="width:78%; background: var(--success);"></div></div>
+          <div class="radar-pct" style="color:var(--success);">78%</div>
+        </div>
+        <div class="radar-bar">
+          <div class="radar-label">三角函数 Trig</div>
+          <div class="radar-track"><div class="radar-fill" style="width:67%; background: var(--success);"></div></div>
+          <div class="radar-pct" style="color:var(--success);">67%</div>
+        </div>
+        <div class="radar-bar">
+          <div class="radar-label">微积分 Calc</div>
+          <div class="radar-track"><div class="radar-fill" style="width:58%; background: var(--primary);"></div></div>
+          <div class="radar-pct" style="color:var(--primary);">58%</div>
+        </div>
+        <div class="radar-bar">
+          <div class="radar-label">二次方程 Quad</div>
+          <div class="radar-track"><div class="radar-fill" style="width:52%; background: var(--primary);"></div></div>
+          <div class="radar-pct" style="color:var(--primary);">52%</div>
+        </div>
+        <div class="radar-bar">
+          <div class="radar-label">几何 Geom</div>
+          <div class="radar-track"><div class="radar-fill" style="width:45%; background: var(--primary);"></div></div>
+          <div class="radar-pct" style="color:var(--primary);">45%</div>
+        </div>
+        <div class="radar-bar">
+          <div class="radar-label">概率 Prob</div>
+          <div class="radar-track"><div class="radar-fill" style="width:32%; background: var(--danger);"></div></div>
+          <div class="radar-pct" style="color:var(--danger);">32%</div>
+        </div>
+      </div>
+
+      <button class="settings-btn" onclick="showToast('⚙️ 设置页面 Settings page')">⚙️ 设置 Settings</button>
+    </div>
+
+  </div><!-- /app-content -->
+
+  <!-- ===== Bottom Navigation ===== -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" onclick="switchTab(0)">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">首页</span>
+    </button>
+    <button class="nav-item" onclick="switchTab(1)">
+      <span class="nav-icon">📝</span>
+      <span class="nav-label">练习</span>
+    </button>
+    <button class="nav-item scan-btn" onclick="switchTab(2)">
+      <span class="nav-icon">📷</span>
+      <span class="nav-label">扫描</span>
+    </button>
+    <button class="nav-item" onclick="switchTab(3)">
+      <span class="nav-icon">🌳</span>
+      <span class="nav-label">森林</span>
+    </button>
+    <button class="nav-item" onclick="switchTab(4)">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">我的</span>
+    </button>
+  </nav>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ===== State =====
+const screenIds = ['screen-home', 'screen-practice', 'screen-scan', 'screen-forest', 'screen-profile'];
+let currentTab = 0;
+let questionAnswered = false;
+let timerInterval = null;
+let timerSeconds = 25 * 60;
+let forestTimerRunning = false;
+
+// ===== Tab Switching =====
+function switchTab(idx) {
+  currentTab = idx;
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(s => s.classList.remove('active'));
+
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(n => n.classList.remove('active'));
+
+  document.getElementById(screenIds[idx]).classList.add('active');
+  navItems[idx].classList.add('active');
+
+  document.getElementById('appContent').scrollTop = 0;
+
+  document.getElementById('bottomNav').style.display = 'flex';
+
+  // Resize Three.js canvas when forest tab is shown
+  if (idx === 3 && forestRenderer) {
+    setTimeout(resizeForestCanvas, 50);
+  }
+}
+
+// ===== Language Toggle =====
+function toggleLang(btn) {
+  btn.style.background = '#FFF3EE';
+  btn.style.borderColor = 'var(--primary)';
+  btn.style.color = 'var(--primary)';
+  setTimeout(() => {
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }, 300);
+  showToast('语言切换功能 Language toggle (demo)');
+}
+
+// ===== Exam Tab =====
+function setExamTab(tab) {
+  document.querySelectorAll('.exam-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+}
+
+// ===== Question View =====
+function showQuestionView() {
+  questionAnswered = false;
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-question').classList.add('active');
+  document.getElementById('bottomNav').style.display = 'none';
+
+  document.querySelectorAll('.option-card').forEach(o => {
+    o.classList.remove('selected', 'correct', 'incorrect');
+    o.style.pointerEvents = '';
+  });
+  document.getElementById('feedbackPanel').classList.remove('show', 'correct', 'incorrect');
+  document.getElementById('xpBadge').classList.remove('show');
+  document.getElementById('appContent').scrollTop = 0;
+}
+
+function exitQuestionView() {
+  switchTab(currentTab === 2 ? 0 : (currentTab || 1));
+}
+
+function selectOption(el, isCorrect) {
+  if (questionAnswered) return;
+  questionAnswered = true;
+
+  const options = document.querySelectorAll('.option-card');
+  options.forEach(o => o.style.pointerEvents = 'none');
+
+  if (isCorrect) {
+    el.classList.add('correct');
+    showFeedback(true);
+  } else {
+    el.classList.add('incorrect');
+    options.forEach(o => {
+      if (o.getAttribute('data-correct') === 'true') {
+        o.classList.add('correct');
+      }
+    });
+    showFeedback(false);
+  }
+}
+
+function showFeedback(isCorrect) {
+  const panel = document.getElementById('feedbackPanel');
+  const banner = document.getElementById('feedbackBanner');
+  const xpBadge = document.getElementById('xpBadge');
+
+  panel.classList.remove('correct', 'incorrect');
+
+  if (isCorrect) {
+    panel.classList.add('show', 'correct');
+    banner.className = 'feedback-banner correct';
+    banner.innerHTML = '✅ 回答正确！Correct!';
+
+    xpBadge.classList.add('show');
+    setTimeout(() => xpBadge.classList.remove('show'), 1200);
+  } else {
+    panel.classList.add('show', 'incorrect');
+    banner.className = 'feedback-banner incorrect';
+    banner.innerHTML = '❌ 回答错误 Incorrect';
+  }
+
+  setTimeout(() => {
+    document.getElementById('appContent').scrollTo({
+      top: document.getElementById('feedbackPanel').offsetTop - 100,
+      behavior: 'smooth'
+    });
+  }, 300);
+}
+
+function nextQuestion() {
+  showToast('下一题加载中... Loading next question...');
+  setTimeout(() => showQuestionView(), 600);
+}
+
+// ===== Scan / Camera =====
+function capturePhoto() {
+  const uploadArea = document.getElementById('scanUploadArea');
+  const result = document.getElementById('scanResult');
+  const loading = document.getElementById('scanLoading');
+  const solution = document.getElementById('scanSolution');
+
+  uploadArea.style.display = 'none';
+  result.classList.add('show');
+  loading.classList.add('show');
+  solution.classList.remove('show');
+
+  setTimeout(() => {
+    loading.classList.remove('show');
+    solution.classList.add('show');
+  }, 2000);
+}
+
+function resetScan() {
+  const uploadArea = document.getElementById('scanUploadArea');
+  const result = document.getElementById('scanResult');
+
+  result.classList.remove('show');
+  uploadArea.style.display = 'block';
+}
+
+// =============================================
+// ===== THREE.JS FOREST GARDEN =====
+// =============================================
+
+let forestScene, forestCamera, forestRenderer;
+let forestGridState = []; // 4 rows x 6 cols
+let forestMeshes = [];    // 4x6 array of {group: THREE.Group or null}
+let plotMeshes = [];      // 4x6 array of plot tile meshes
+let saplingAnimations = []; // track animated saplings
+let activeSaplingCell = null; // {row, col}
+
+const GRID_ROWS = 4;
+const GRID_COLS = 6;
+const TILE_SIZE = 1.0;
+const TILE_GAP = 0;
+const TILE_HEIGHT = 0.7; // total slab height (grass layer + earth layer)
+
+// Grid layout:
+// Row 0: mature-A, mature-B, flower, empty, empty, empty
+// Row 1: mature-C, sapling,  mature-A, withered, empty, empty
+// Row 2: mature-B, mature-A, flower, mature-C, empty, empty
+// Row 3: mature-A, mature-B, mature-C, withered, empty, empty
+
+const INITIAL_GRID = [
+  ['mature-A', 'mature-B', 'flower',   'empty', 'empty', 'empty'],
+  ['mature-C', 'sapling',  'mature-A', 'withered', 'empty', 'empty'],
+  ['mature-B', 'mature-A', 'flower',   'mature-C', 'empty', 'empty'],
+  ['mature-A', 'mature-B', 'mature-C', 'withered', 'empty', 'empty']
+];
+
+function initForestScene() {
+  const container = document.getElementById('forestGardenContainer');
+  const canvas = document.getElementById('forestCanvas');
+
+  // --- Renderer ---
+  forestRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+  forestRenderer.setPixelRatio(window.devicePixelRatio);
+  forestRenderer.shadowMap.enabled = true;
+  forestRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  forestRenderer.setClearColor(0x1A3A12, 1);
+
+  // --- Scene ---
+  forestScene = new THREE.Scene();
+  forestScene.background = new THREE.Color(0x1A3A12);
+
+  // --- Camera (Orthographic for true isometric) ---
+  const aspect = container.clientWidth / container.clientHeight;
+  const frustumSize = 5.0;
+  forestCamera = new THREE.OrthographicCamera(
+    -frustumSize * aspect, frustumSize * aspect,
+    frustumSize, -frustumSize,
+    0.1, 100
+  );
+
+  // Isometric angle: rotate 45 degrees Y, tilt ~30 degrees from top
+  const camDist = 15;
+  const angleY = Math.PI / 4;    // 45 degrees
+  const angleX = Math.PI / 5.5;  // ~33 degrees from horizontal
+  forestCamera.position.set(
+    camDist * Math.sin(angleY) * Math.cos(angleX),
+    camDist * Math.sin(angleX),
+    camDist * Math.cos(angleY) * Math.cos(angleX)
+  );
+  forestCamera.lookAt(0, 0.3, 0);
+
+  // --- Lighting ---
+  // Ambient
+  const ambientLight = new THREE.AmbientLight(0xFFF8E7, 0.5);
+  forestScene.add(ambientLight);
+
+  // Hemisphere light for subtle bounce
+  const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x4A3728, 0.25);
+  forestScene.add(hemiLight);
+
+  // Directional light (upper-left, casts shadows)
+  const dirLight = new THREE.DirectionalLight(0xFFF5E0, 0.8);
+  dirLight.position.set(-5, 8, 5);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 1024;
+  dirLight.shadow.mapSize.height = 1024;
+  dirLight.shadow.camera.near = 0.5;
+  dirLight.shadow.camera.far = 30;
+  dirLight.shadow.camera.left = -8;
+  dirLight.shadow.camera.right = 8;
+  dirLight.shadow.camera.top = 8;
+  dirLight.shadow.camera.bottom = -8;
+  dirLight.shadow.bias = -0.002;
+  forestScene.add(dirLight);
+
+  // --- Build floating island slab with grid lines ---
+  buildPlotGrid();
+
+  // --- Populate with initial trees ---
+  for (let r = 0; r < GRID_ROWS; r++) {
+    forestGridState[r] = [];
+    forestMeshes[r] = [];
+    for (let c = 0; c < GRID_COLS; c++) {
+      forestGridState[r][c] = INITIAL_GRID[r][c];
+      forestMeshes[r][c] = null;
+      if (INITIAL_GRID[r][c] !== 'empty') {
+        placeTreeMesh(r, c, INITIAL_GRID[r][c]);
+      }
+    }
+  }
+
+  // --- Resize ---
+  resizeForestCanvas();
+  window.addEventListener('resize', resizeForestCanvas);
+
+  // --- Animation loop ---
+  animateForest();
+}
+
+function resizeForestCanvas() {
+  const container = document.getElementById('forestGardenContainer');
+  if (!container || !forestRenderer) return;
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  forestRenderer.setSize(w, h);
+  const aspect = w / h;
+  const frustumSize = 5.0;
+  forestCamera.left = -frustumSize * aspect;
+  forestCamera.right = frustumSize * aspect;
+  forestCamera.top = frustumSize;
+  forestCamera.bottom = -frustumSize;
+  forestCamera.updateProjectionMatrix();
+}
+
+function buildPlotGrid() {
+  // --- Single floating island slab ---
+  const totalW = GRID_COLS * TILE_SIZE; // 6
+  const totalD = GRID_ROWS * TILE_SIZE; // 4
+
+  const grassLayerH = 0.2;
+  const earthLayerH = 0.5;
+  const slabH = grassLayerH + earthLayerH; // 0.7
+
+  // --- Top grass layer box ---
+  const grassGeo = new THREE.BoxGeometry(totalW, grassLayerH, totalD);
+  const grassTopMat = new THREE.MeshLambertMaterial({ color: 0x7EC850 });
+  const grassSideMat = new THREE.MeshLambertMaterial({ color: 0x5EA23A });
+  const grassBottomMat = new THREE.MeshLambertMaterial({ color: 0x5EA23A });
+  // BoxGeometry faces order: +x, -x, +y(top), -y(bottom), +z, -z
+  const grassMaterials = [grassSideMat, grassSideMat, grassTopMat, grassBottomMat, grassSideMat, grassSideMat];
+  const grassMesh = new THREE.Mesh(grassGeo, grassMaterials);
+  grassMesh.position.set(0, earthLayerH + grassLayerH / 2, 0);
+  grassMesh.receiveShadow = true;
+  grassMesh.castShadow = true;
+  forestScene.add(grassMesh);
+
+  // --- Bottom earth layer box ---
+  const earthGeo = new THREE.BoxGeometry(totalW, earthLayerH, totalD);
+  const earthTopMat = new THREE.MeshLambertMaterial({ color: 0x8B6914 });
+  const earthSideMat = new THREE.MeshLambertMaterial({ color: 0x8B6914 });
+  const earthBottomMat = new THREE.MeshLambertMaterial({ color: 0x6B4F10 });
+  const earthMaterials = [earthSideMat, earthSideMat, earthTopMat, earthBottomMat, earthSideMat, earthSideMat];
+  const earthMesh = new THREE.Mesh(earthGeo, earthMaterials);
+  earthMesh.position.set(0, earthLayerH / 2, 0);
+  earthMesh.receiveShadow = true;
+  earthMesh.castShadow = true;
+  forestScene.add(earthMesh);
+
+  // --- Grid lines on top of the grass surface ---
+  const gridLineY = slabH + 0.005; // just above the grass top
+  const gridLineColor = 0x6BB344;
+  const lineW = 0.02;
+  const lineH = 0.01;
+
+  // Vertical lines (along Z axis) — GRID_COLS + 1 lines
+  for (let c = 0; c <= GRID_COLS; c++) {
+    const x = -totalW / 2 + c * TILE_SIZE;
+    const lineGeo = new THREE.BoxGeometry(lineW, lineH, totalD);
+    const lineMat = new THREE.MeshLambertMaterial({ color: gridLineColor });
+    const lineMesh = new THREE.Mesh(lineGeo, lineMat);
+    lineMesh.position.set(x, gridLineY, 0);
+    forestScene.add(lineMesh);
+  }
+
+  // Horizontal lines (along X axis) — GRID_ROWS + 1 lines
+  for (let r = 0; r <= GRID_ROWS; r++) {
+    const z = -totalD / 2 + r * TILE_SIZE;
+    const lineGeo = new THREE.BoxGeometry(totalW, lineH, lineW);
+    const lineMat = new THREE.MeshLambertMaterial({ color: gridLineColor });
+    const lineMesh = new THREE.Mesh(lineGeo, lineMat);
+    lineMesh.position.set(0, gridLineY, z);
+    forestScene.add(lineMesh);
+  }
+
+  // Initialize plotMeshes array (no individual tiles, but keep array for compatibility)
+  for (let r = 0; r < GRID_ROWS; r++) {
+    plotMeshes[r] = [];
+    for (let c = 0; c < GRID_COLS; c++) {
+      plotMeshes[r][c] = grassMesh; // reference to the shared slab
+    }
+  }
+}
+
+function getTileWorldPos(row, col) {
+  // Center the grid
+  const totalW = GRID_COLS * (TILE_SIZE + TILE_GAP) - TILE_GAP;
+  const totalH = GRID_ROWS * (TILE_SIZE + TILE_GAP) - TILE_GAP;
+  const startX = -totalW / 2 + TILE_SIZE / 2;
+  const startZ = -totalH / 2 + TILE_SIZE / 2;
+  return {
+    x: startX + col * (TILE_SIZE + TILE_GAP),
+    z: startZ + row * (TILE_SIZE + TILE_GAP)
+  };
+}
+
+// ===== Tree Creation Functions =====
+
+function createMatureTreeA() {
+  const group = new THREE.Group();
+
+  // Trunk
+  const trunkGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.8, 8);
+  const trunkMat = new THREE.MeshPhongMaterial({ color: 0x8B5E3C });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.4;
+  trunk.castShadow = true;
+  group.add(trunk);
+
+  // Canopy - round sphere
+  const canopyGeo = new THREE.SphereGeometry(0.55, 12, 10);
+  const greenVariants = [0x4CAF50, 0x43A047, 0x388E3C, 0x2E7D32, 0x66BB6A];
+  const canopyMat = new THREE.MeshPhongMaterial({
+    color: greenVariants[Math.floor(Math.random() * greenVariants.length)],
+    shininess: 15,
+    flatShading: true
+  });
+  const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+  canopy.position.y = 1.05;
+  canopy.castShadow = true;
+  group.add(canopy);
+
+  return group;
+}
+
+function createMatureTreeB() {
+  // Layered cone (pine/christmas tree)
+  const group = new THREE.Group();
+
+  // Trunk
+  const trunkGeo = new THREE.CylinderGeometry(0.05, 0.07, 0.6, 8);
+  const trunkMat = new THREE.MeshPhongMaterial({ color: 0x8B5E3C });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.3;
+  trunk.castShadow = true;
+  group.add(trunk);
+
+  // Bottom cone
+  const cone1Geo = new THREE.ConeGeometry(0.7, 0.6, 8);
+  const cone1Mat = new THREE.MeshPhongMaterial({ color: 0x2E7D32, flatShading: true, shininess: 10 });
+  const cone1 = new THREE.Mesh(cone1Geo, cone1Mat);
+  cone1.position.y = 0.75;
+  cone1.castShadow = true;
+  group.add(cone1);
+
+  // Middle cone
+  const cone2Geo = new THREE.ConeGeometry(0.55, 0.5, 8);
+  const cone2Mat = new THREE.MeshPhongMaterial({ color: 0x388E3C, flatShading: true, shininess: 10 });
+  const cone2 = new THREE.Mesh(cone2Geo, cone2Mat);
+  cone2.position.y = 1.15;
+  cone2.castShadow = true;
+  group.add(cone2);
+
+  // Top cone
+  const cone3Geo = new THREE.ConeGeometry(0.4, 0.45, 8);
+  const cone3Mat = new THREE.MeshPhongMaterial({ color: 0x43A047, flatShading: true, shininess: 10 });
+  const cone3 = new THREE.Mesh(cone3Geo, cone3Mat);
+  cone3.position.y = 1.5;
+  cone3.castShadow = true;
+  group.add(cone3);
+
+  return group;
+}
+
+function createMatureTreeC() {
+  // Multi-sphere bushy tree
+  const group = new THREE.Group();
+
+  // Trunk
+  const trunkGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.7, 8);
+  const trunkMat = new THREE.MeshPhongMaterial({ color: 0x8B5E3C });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.35;
+  trunk.castShadow = true;
+  group.add(trunk);
+
+  // Multiple overlapping spheres for bushy look
+  const bushColors = [0x4CAF50, 0x388E3C, 0x43A047];
+  const bushPositions = [
+    { x: 0, y: 0.95, z: 0, r: 0.45 },
+    { x: 0.2, y: 1.1, z: 0.15, r: 0.38 },
+    { x: -0.18, y: 1.15, z: -0.1, r: 0.35 }
+  ];
+
+  bushPositions.forEach((bp, i) => {
+    const sGeo = new THREE.SphereGeometry(bp.r, 10, 8);
+    const sMat = new THREE.MeshPhongMaterial({
+      color: bushColors[i % bushColors.length],
+      flatShading: true,
+      shininess: 12
+    });
+    const sphere = new THREE.Mesh(sGeo, sMat);
+    sphere.position.set(bp.x, bp.y, bp.z);
+    sphere.castShadow = true;
+    group.add(sphere);
+  });
+
+  return group;
+}
+
+function createSapling() {
+  const group = new THREE.Group();
+  group.userData.isSapling = true;
+  group.userData.bobPhase = Math.random() * Math.PI * 2;
+
+  // Very thin short trunk
+  const trunkGeo = new THREE.CylinderGeometry(0.03, 0.04, 0.3, 6);
+  const trunkMat = new THREE.MeshPhongMaterial({ color: 0x8B5E3C });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.15;
+  trunk.castShadow = true;
+  group.add(trunk);
+
+  // Small bright canopy
+  const canopyGeo = new THREE.SphereGeometry(0.25, 10, 8);
+  const canopyMat = new THREE.MeshPhongMaterial({
+    color: 0x90EE90,
+    shininess: 20,
+    flatShading: true
+  });
+  const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+  canopy.position.y = 0.5;
+  canopy.castShadow = true;
+  group.add(canopy);
+
+  return group;
+}
+
+function createWitheredTree() {
+  const group = new THREE.Group();
+
+  // Thin trunk, slightly tilted
+  const trunkGeo = new THREE.CylinderGeometry(0.04, 0.06, 0.5, 6);
+  const trunkMat = new THREE.MeshPhongMaterial({ color: 0x6B4423 });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.25;
+  trunk.castShadow = true;
+  group.add(trunk);
+
+  // Small grey-brown canopy
+  const canopyGeo = new THREE.SphereGeometry(0.3, 8, 6);
+  const canopyMat = new THREE.MeshPhongMaterial({
+    color: 0x8B7355,
+    shininess: 5,
+    flatShading: true
+  });
+  const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+  canopy.position.y = 0.6;
+  canopy.castShadow = true;
+  group.add(canopy);
+
+  // Slight tilt
+  group.rotation.z = 0.09; // ~5 degrees
+
+  return group;
+}
+
+function createFlowerBush() {
+  const group = new THREE.Group();
+
+  // Green bush sphere sitting on plot
+  const bushGeo = new THREE.SphereGeometry(0.4, 10, 8);
+  const bushMat = new THREE.MeshPhongMaterial({
+    color: 0x4CAF50,
+    shininess: 15,
+    flatShading: true
+  });
+  const bush = new THREE.Mesh(bushGeo, bushMat);
+  bush.position.y = 0.4;
+  bush.castShadow = true;
+  group.add(bush);
+
+  // Tiny pink flower spheres dotted on top
+  const flowerPositions = [
+    { x: 0.1, y: 0.72, z: 0.08 },
+    { x: -0.15, y: 0.68, z: 0.12 },
+    { x: 0.05, y: 0.75, z: -0.12 },
+    { x: -0.08, y: 0.7, z: -0.05 }
+  ];
+  const flowerColors = [0xFF69B4, 0xFFB6C1, 0xFF1493, 0xDB7093];
+
+  flowerPositions.forEach((fp, i) => {
+    const fGeo = new THREE.SphereGeometry(0.08, 6, 5);
+    const fMat = new THREE.MeshPhongMaterial({
+      color: flowerColors[i % flowerColors.length],
+      shininess: 30
+    });
+    const flower = new THREE.Mesh(fGeo, fMat);
+    flower.position.set(fp.x, fp.y, fp.z);
+    flower.castShadow = false;
+    group.add(flower);
+  });
+
+  return group;
+}
+
+function createTreeByType(type) {
+  switch (type) {
+    case 'mature-A': return createMatureTreeA();
+    case 'mature-B': return createMatureTreeB();
+    case 'mature-C': return createMatureTreeC();
+    case 'sapling':  return createSapling();
+    case 'withered': return createWitheredTree();
+    case 'flower':   return createFlowerBush();
+    default: return null;
+  }
+}
+
+function placeTreeMesh(row, col, type) {
+  // Remove existing mesh if any
+  removeTreeMesh(row, col);
+
+  const treeMesh = createTreeByType(type);
+  if (!treeMesh) return;
+
+  const pos = getTileWorldPos(row, col);
+  treeMesh.position.set(pos.x, TILE_HEIGHT, pos.z);
+  forestScene.add(treeMesh);
+  forestMeshes[row][col] = treeMesh;
+  forestGridState[row][col] = type;
+}
+
+function removeTreeMesh(row, col) {
+  if (forestMeshes[row] && forestMeshes[row][col]) {
+    forestScene.remove(forestMeshes[row][col]);
+    // Dispose geometries/materials
+    forestMeshes[row][col].traverse(function(child) {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    });
+    forestMeshes[row][col] = null;
+  }
+}
+
+// ===== Forest Animation Loop =====
+function animateForest() {
+  requestAnimationFrame(animateForest);
+
+  const time = Date.now() * 0.001;
+
+  // Animate saplings (gentle bob)
+  for (let r = 0; r < GRID_ROWS; r++) {
+    for (let c = 0; c < GRID_COLS; c++) {
+      const mesh = forestMeshes[r] && forestMeshes[r][c];
+      if (mesh && mesh.userData.isSapling) {
+        const phase = mesh.userData.bobPhase || 0;
+        const baseY = TILE_HEIGHT;
+        mesh.position.y = baseY + Math.sin(time * 2 + phase) * 0.04;
+      }
+    }
+  }
+
+  forestRenderer.render(forestScene, forestCamera);
+}
+
+// ===== Three.js Grid Logic (replaces old CSS grid functions) =====
+
+function findFirstEmptyCell() {
+  for (let r = 0; r < GRID_ROWS; r++) {
+    for (let c = 0; c < GRID_COLS; c++) {
+      if (forestGridState[r][c] === 'empty') {
+        return { row: r, col: c };
+      }
+    }
+  }
+  return null;
+}
+
+function placeSaplingOnGrid(row, col) {
+  placeTreeMesh(row, col, 'sapling');
+  activeSaplingCell = { row: row, col: col };
+}
+
+function growSaplingToMature3D(row, col) {
+  const matureTypes = ['mature-A', 'mature-B', 'mature-C'];
+  const randomType = matureTypes[Math.floor(Math.random() * matureTypes.length)];
+
+  // Remove sapling
+  removeTreeMesh(row, col);
+
+  // Place mature tree with scale-up animation
+  const treeMesh = createTreeByType(randomType);
+  if (!treeMesh) return;
+
+  const pos = getTileWorldPos(row, col);
+  treeMesh.position.set(pos.x, TILE_HEIGHT, pos.z);
+  treeMesh.scale.set(0, 0, 0);
+  forestScene.add(treeMesh);
+  forestMeshes[row][col] = treeMesh;
+  forestGridState[row][col] = randomType;
+
+  // Animate scale up
+  const startTime = Date.now();
+  const duration = 600;
+  function animScale() {
+    const elapsed = Date.now() - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    // Elastic ease out
+    const p = t === 1 ? 1 : 1 - Math.pow(2, -10 * t) * Math.cos((t * 10 - 0.75) * (2 * Math.PI / 3));
+    const s = Math.max(0, p);
+    treeMesh.scale.set(s, s, s);
+    if (t < 1) requestAnimationFrame(animScale);
+  }
+  animScale();
+
+  activeSaplingCell = null;
+}
+
+function witherSapling3D(row, col) {
+  // Animate current sapling withering, then replace with withered tree
+  const currentMesh = forestMeshes[row] && forestMeshes[row][col];
+
+  if (currentMesh) {
+    // Animate shrink + color shift
+    const startTime = Date.now();
+    const duration = 500;
+
+    function animWither() {
+      const elapsed = Date.now() - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const s = 1 - t * 0.3;
+      currentMesh.scale.set(s, s, s);
+      currentMesh.rotation.z = t * 0.09;
+      if (t < 1) {
+        requestAnimationFrame(animWither);
+      } else {
+        // Replace with withered tree
+        placeTreeMesh(row, col, 'withered');
+      }
+    }
+    animWither();
+  } else {
+    placeTreeMesh(row, col, 'withered');
+  }
+
+  activeSaplingCell = null;
+}
+
+function resetCellToEmpty(row, col) {
+  removeTreeMesh(row, col);
+  forestGridState[row][col] = 'empty';
+}
+
+// ===== Forest Timer =====
+function startPlanting() {
+  forestTimerRunning = true;
+  timerSeconds = 25 * 60;
+
+  document.getElementById('plantBtn').classList.add('hidden');
+  document.getElementById('timerDisplay').classList.add('show');
+
+  // Place a sapling on the first empty cell
+  const emptyCell = findFirstEmptyCell();
+  if (emptyCell) {
+    placeSaplingOnGrid(emptyCell.row, emptyCell.col);
+  }
+
+  updateTimerDisplay();
+
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      forestTimerRunning = false;
+
+      // Convert sapling to mature tree
+      if (activeSaplingCell) {
+        growSaplingToMature3D(activeSaplingCell.row, activeSaplingCell.col);
+      }
+
+      document.getElementById('plantBtn').classList.remove('hidden');
+      document.getElementById('timerDisplay').classList.remove('show');
+      showToast('🌳 树木已长大！Tree has grown!');
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopPlanting() {
+  clearInterval(timerInterval);
+  forestTimerRunning = false;
+
+  const witheredCell = activeSaplingCell ? { row: activeSaplingCell.row, col: activeSaplingCell.col } : null;
+
+  // Wither the sapling
+  if (witheredCell) {
+    witherSapling3D(witheredCell.row, witheredCell.col);
+  }
+
+  document.getElementById('plantBtn').classList.remove('hidden');
+  document.getElementById('timerDisplay').classList.remove('show');
+
+  showToast('🥀 树木枯萎了 Tree has withered');
+
+  // Reset withered cell to empty after 2 seconds
+  setTimeout(() => {
+    if (witheredCell) {
+      resetCellToEmpty(witheredCell.row, witheredCell.col);
+    }
+  }, 2000);
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(timerSeconds / 60);
+  const secs = timerSeconds % 60;
+  document.getElementById('timerTime').textContent =
+    String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+  const totalSeconds = 25 * 60;
+  const elapsed = totalSeconds - timerSeconds;
+  const circumference = 2 * Math.PI * 64;
+  const offset = (elapsed / totalSeconds) * circumference;
+  document.getElementById('timerCircleFg').setAttribute('stroke-dashoffset', String(circumference - offset));
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Set initial timer circle
+  const circumference = 2 * Math.PI * 64;
+  document.getElementById('timerCircleFg').setAttribute('stroke-dasharray', String(circumference));
+  document.getElementById('timerCircleFg').setAttribute('stroke-dashoffset', '0');
+
+  // Initialize Three.js forest scene
+  initForestScene();
+});
+</script>
+</body>
+</html>
