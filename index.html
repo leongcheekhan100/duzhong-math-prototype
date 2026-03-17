@@ -1304,11 +1304,11 @@ html, body {
         </div>
       </div>
 
-      <div class="recommended-card" onclick="showQuestionView()">
+      <div class="recommended-card" onclick="startQuiz('代数')">
         <div class="recommended-label">📖 今日推荐练习 Today's Recommended</div>
-        <div class="recommended-title">二次方程</div>
-        <div class="recommended-sub">Quadratic Equations · 10 题 questions</div>
-        <button class="recommended-btn" onclick="event.stopPropagation(); showQuestionView();">开始练习 Start →</button>
+        <div class="recommended-title">代数</div>
+        <div class="recommended-sub">Algebra · 10 题 questions</div>
+        <button class="recommended-btn" onclick="event.stopPropagation(); startQuiz('代数');">开始练习 Start →</button>
       </div>
 
       <div class="weak-section">
@@ -1351,7 +1351,7 @@ html, body {
       </div>
 
       <div class="quick-actions">
-        <button class="btn btn-primary" onclick="switchTab(1)">📝 开始练习<br><span style="font-size:11px;opacity:0.8;">Start Practice</span></button>
+        <button class="btn btn-primary" onclick="startAllQuiz()">📝 开始练习<br><span style="font-size:11px;opacity:0.8;">Start Practice</span></button>
       </div>
     </div>
 
@@ -1377,71 +1377,13 @@ html, body {
         <option>高三 Senior 3</option>
       </select>
 
-      <div class="topic-grid">
-        <div class="topic-card" onclick="showQuestionView()">
-          <div class="topic-emoji">🔢</div>
-          <div class="topic-name">代数<div class="topic-name-en">Algebra</div></div>
-          <div class="topic-meta">
-            <span class="topic-questions">120 题</span>
-            <span class="topic-mastery" style="color:var(--success);">78%</span>
-          </div>
-          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:78%; background: var(--success);"></div></div>
-        </div>
-
-        <div class="topic-card" onclick="showQuestionView()">
-          <div class="topic-emoji">📐</div>
-          <div class="topic-name">几何<div class="topic-name-en">Geometry</div></div>
-          <div class="topic-meta">
-            <span class="topic-questions">95 题</span>
-            <span class="topic-mastery" style="color:var(--primary);">45%</span>
-          </div>
-          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:45%; background: var(--primary);"></div></div>
-        </div>
-
-        <div class="topic-card" onclick="showQuestionView()">
-          <div class="topic-emoji">📊</div>
-          <div class="topic-name">三角函数<div class="topic-name-en">Trigonometry</div></div>
-          <div class="topic-meta">
-            <span class="topic-questions">80 题</span>
-            <span class="topic-mastery" style="color:var(--success);">67%</span>
-          </div>
-          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:67%; background: var(--success);"></div></div>
-        </div>
-
-        <div class="topic-card" onclick="showQuestionView()">
-          <div class="topic-emoji">🎲</div>
-          <div class="topic-name">概率与统计<div class="topic-name-en">Probability & Stats</div></div>
-          <div class="topic-meta">
-            <span class="topic-questions">65 题</span>
-            <span class="topic-mastery" style="color:var(--danger);">32%</span>
-          </div>
-          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:32%; background: var(--danger);"></div></div>
-        </div>
-
-        <div class="topic-card" onclick="showQuestionView()">
-          <div class="topic-emoji">📈</div>
-          <div class="topic-name">微积分<div class="topic-name-en">Calculus</div></div>
-          <div class="topic-meta">
-            <span class="topic-questions">55 题</span>
-            <span class="topic-mastery" style="color:var(--primary);">58%</span>
-          </div>
-          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:58%; background: var(--primary);"></div></div>
-        </div>
-
-        <div class="topic-card" onclick="showQuestionView()">
-          <div class="topic-emoji">✏️</div>
-          <div class="topic-name">二次方程<div class="topic-name-en">Quadratic Eq.</div></div>
-          <div class="topic-meta">
-            <span class="topic-questions">45 题</span>
-            <span class="topic-mastery" style="color:var(--primary);">52%</span>
-          </div>
-          <div class="progress-bar-bg" style="margin-top:6px;"><div class="progress-bar-fill" style="width:52%; background: var(--primary);"></div></div>
-        </div>
+      <div class="topic-grid" id="topicGrid">
+        <!-- Topic cards generated dynamically from question bank -->
       </div>
 
-      <button class="mock-btn" onclick="showToast('模拟考即将开始 Mock exam starting...')">
+      <button class="mock-btn" onclick="startAllQuiz()">
         📝 模拟考 Mock Exam
-        <span class="mock-sub">模拟真实考试环境 Simulate real exam conditions</span>
+        <span class="mock-sub">随机10题模拟 10 random questions from all topics</span>
       </button>
     </div>
 
@@ -1449,58 +1391,57 @@ html, body {
     <div class="screen" id="screen-question">
       <div class="question-header">
         <button class="question-back" onclick="exitQuestionView()">←</button>
-        <span class="question-progress-text" id="qProgressText">题 3/10</span>
+        <span class="question-progress-text" id="qProgressText">题 1/10</span>
         <button class="question-close" onclick="exitQuestionView()">✕</button>
       </div>
       <div class="question-progress-bar">
-        <div class="question-progress-fill" id="qProgressFill" style="width: 30%;"></div>
+        <div class="question-progress-fill" id="qProgressFill" style="width: 10%;"></div>
       </div>
 
-      <div class="question-topic-tag">✏️ 二次方程 Quadratic Equations</div>
+      <div class="question-topic-tag" id="qTopicTag"></div>
 
       <div class="question-box">
-        <div class="question-number">第 3 题 Question 3</div>
-        <div class="question-text">解下列二次方程，求 x 的值：</div>
-        <div class="question-text" style="font-size:13px; color:var(--text-secondary); margin-top:2px;">Solve the following quadratic equation for x:</div>
-        <div class="question-math">x² + 5x + 6 = 0</div>
+        <div class="question-number" id="qNumber"></div>
+        <div class="question-text" id="qTextZh"></div>
+        <div class="question-text" id="qTextEn" style="font-size:13px; color:var(--text-secondary); margin-top:2px;"></div>
       </div>
 
-      <div class="options-list" id="optionsList">
-        <div class="option-card" onclick="selectOption(this, false)" data-correct="false">
-          <div class="option-letter">A</div>
-          <div class="option-text">x = 2, x = 3</div>
-        </div>
-        <div class="option-card" onclick="selectOption(this, true)" data-correct="true">
-          <div class="option-letter">B</div>
-          <div class="option-text">x = -2, x = -3</div>
-        </div>
-        <div class="option-card" onclick="selectOption(this, false)" data-correct="false">
-          <div class="option-letter">C</div>
-          <div class="option-text">x = -1, x = -6</div>
-        </div>
-        <div class="option-card" onclick="selectOption(this, false)" data-correct="false">
-          <div class="option-letter">D</div>
-          <div class="option-text">x = 1, x = 6</div>
-        </div>
-      </div>
+      <div class="options-list" id="optionsList"></div>
 
       <div class="feedback-panel" id="feedbackPanel">
         <div class="feedback-banner" id="feedbackBanner"></div>
-        <div class="feedback-explanation">
-          <div class="feedback-step"><strong>步骤 1 Step 1:</strong> 因式分解方程 Factor the equation</div>
-          <div class="feedback-step" style="padding-left:12px;">x² + 5x + 6 = (x + 2)(x + 3) = 0</div>
-          <div class="feedback-step" style="margin-top:6px;"><strong>步骤 2 Step 2:</strong> 令每个因子等于零 Set each factor to zero</div>
-          <div class="feedback-step" style="padding-left:12px;">x + 2 = 0 → x = -2</div>
-          <div class="feedback-step" style="padding-left:12px;">x + 3 = 0 → x = -3</div>
-          <div class="feedback-step" style="margin-top:6px;"><strong>答案 Answer:</strong> x = -2, x = -3 ✅</div>
-        </div>
+        <div class="feedback-explanation" id="feedbackExplanation"></div>
         <div class="feedback-actions">
           <button class="btn btn-outline" onclick="showToast('AI助手已打开 AI Assistant opened')">🤖 问AI Ask AI</button>
-          <button class="btn btn-primary" onclick="nextQuestion()">下一题 Next →</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">下一题 Next →</button>
         </div>
       </div>
 
       <div class="xp-badge" id="xpBadge">+15 XP ⭐</div>
+
+      <!-- Quiz Complete Summary -->
+      <div id="quizSummary" style="display:none; text-align:center; padding:20px 0;">
+        <div style="font-size:48px; margin-bottom:16px;">🎉</div>
+        <div style="font-size:22px; font-weight:700; margin-bottom:8px;">练习完成！</div>
+        <div style="font-size:14px; color:var(--text-secondary); margin-bottom:24px;">Practice Complete</div>
+        <div class="card" style="text-align:left; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-around; text-align:center;">
+            <div>
+              <div style="font-size:28px; font-weight:800; color:var(--success);" id="summaryCorrect">0</div>
+              <div style="font-size:11px; color:var(--text-secondary);">正确 Correct</div>
+            </div>
+            <div>
+              <div style="font-size:28px; font-weight:800; color:var(--danger);" id="summaryWrong">0</div>
+              <div style="font-size:11px; color:var(--text-secondary);">错误 Wrong</div>
+            </div>
+            <div>
+              <div style="font-size:28px; font-weight:800; color:var(--primary);" id="summaryAccuracy">0%</div>
+              <div style="font-size:11px; color:var(--text-secondary);">正确率 Accuracy</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="exitQuestionView()">返回练习中心 Back to Practice</button>
+      </div>
     </div>
 
     <!-- ===== SCREEN 4: CAMERA/SCAN ===== -->
@@ -1840,6 +1781,23 @@ html, body {
 </div>
 
 <script>
+// ===== Question Bank =====
+let QUESTION_BANK = [];
+
+// Load question bank (embedded below, or could be fetched)
+async function loadQuestionBank() {
+  // Try to fetch from relative path first, fallback to embedded data
+  try {
+    const resp = await fetch('questions.json');
+    if (resp.ok) {
+      QUESTION_BANK = await resp.json();
+      return;
+    }
+  } catch(e) {}
+  // Fallback: use embedded data
+  QUESTION_BANK = EMBEDDED_QUESTIONS;
+}
+
 // ===== State =====
 const screenIds = ['screen-home', 'screen-practice', 'screen-scan', 'screen-forest', 'screen-profile'];
 let currentTab = 0;
@@ -1847,6 +1805,22 @@ let questionAnswered = false;
 let timerInterval = null;
 let timerSeconds = 25 * 60;
 let forestTimerRunning = false;
+
+// Quiz session state
+let quizQuestions = [];       // current quiz question set
+let quizIndex = 0;            // current question index
+let quizCorrect = 0;          // correct count
+let quizWrong = 0;            // wrong count
+let quizCategory = null;      // current category filter
+
+// Topic card config
+const TOPIC_CONFIG = [
+  { category: '代数', category_en: 'Algebra', emoji: '🔢', mastery: 78, color: 'var(--success)' },
+  { category: '三角学', category_en: 'Trigonometry', emoji: '📊', mastery: 67, color: 'var(--success)' },
+  { category: '解析几何', category_en: 'Analytical Geometry', emoji: '📐', mastery: 45, color: 'var(--primary)' },
+  { category: '统计与概率', category_en: 'Statistics & Probability', emoji: '🎲', mastery: 32, color: 'var(--danger)' },
+  { category: '微积分', category_en: 'Calculus', emoji: '📈', mastery: 58, color: 'var(--primary)' }
+];
 
 // ===== Tab Switching =====
 function switchTab(idx) {
@@ -1889,39 +1863,155 @@ function setExamTab(tab) {
   tab.classList.add('active');
 }
 
+// ===== Build Topic Grid =====
+function buildTopicGrid() {
+  const grid = document.getElementById('topicGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  TOPIC_CONFIG.forEach(tc => {
+    const count = QUESTION_BANK.filter(q => q.category === tc.category).length;
+    const card = document.createElement('div');
+    card.className = 'topic-card';
+    card.onclick = () => startQuiz(tc.category);
+    card.innerHTML = `
+      <div class="topic-emoji">${tc.emoji}</div>
+      <div class="topic-name">${tc.category}<div class="topic-name-en">${tc.category_en}</div></div>
+      <div class="topic-meta">
+        <span class="topic-questions">${count} 题</span>
+        <span class="topic-mastery" style="color:${tc.color};">${tc.mastery}%</span>
+      </div>
+      <div class="progress-bar-bg" style="margin-top:6px;">
+        <div class="progress-bar-fill" style="width:${tc.mastery}%; background:${tc.color};"></div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ===== Quiz Logic =====
+function startQuiz(category) {
+  // Filter questions by category, shuffle, take up to 10
+  let pool = QUESTION_BANK.filter(q => q.category === category);
+  // Shuffle
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  quizQuestions = pool.slice(0, Math.min(10, pool.length));
+  quizIndex = 0;
+  quizCorrect = 0;
+  quizWrong = 0;
+  quizCategory = category;
+  showQuestionView();
+}
+
+function startAllQuiz() {
+  // Start quiz with all questions shuffled
+  let pool = [...QUESTION_BANK];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  quizQuestions = pool.slice(0, 10);
+  quizIndex = 0;
+  quizCorrect = 0;
+  quizWrong = 0;
+  quizCategory = null;
+  showQuestionView();
+}
+
 // ===== Question View =====
 function showQuestionView() {
+  if (quizQuestions.length === 0) {
+    startAllQuiz();
+    return;
+  }
+
   questionAnswered = false;
   const screens = document.querySelectorAll('.screen');
   screens.forEach(s => s.classList.remove('active'));
   document.getElementById('screen-question').classList.add('active');
   document.getElementById('bottomNav').style.display = 'none';
+  document.getElementById('quizSummary').style.display = 'none';
+  document.getElementById('appContent').scrollTop = 0;
 
-  document.querySelectorAll('.option-card').forEach(o => {
-    o.classList.remove('selected', 'correct', 'incorrect');
-    o.style.pointerEvents = '';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQuestions[quizIndex];
+  const total = quizQuestions.length;
+  const num = quizIndex + 1;
+
+  // Progress
+  document.getElementById('qProgressText').textContent = `题 ${num}/${total}`;
+  document.getElementById('qProgressFill').style.width = `${(num / total) * 100}%`;
+
+  // Topic tag
+  const topicEmoji = (TOPIC_CONFIG.find(tc => tc.category === q.category) || {}).emoji || '📝';
+  document.getElementById('qTopicTag').textContent = `${topicEmoji} ${q.topicName_zh} ${q.topicName_en}`;
+
+  // Question content
+  document.getElementById('qNumber').textContent = `第 ${num} 题 Question ${num}`;
+  document.getElementById('qTextZh').textContent = q.question_zh;
+  document.getElementById('qTextEn').textContent = q.question_en;
+
+  // Difficulty stars
+  const diffStars = '⭐'.repeat(q.difficulty);
+
+  // Options
+  const optionsList = document.getElementById('optionsList');
+  optionsList.innerHTML = '';
+  q.options.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'option-card';
+    card.setAttribute('data-label', opt.label);
+    card.setAttribute('data-correct', opt.label === q.answer ? 'true' : 'false');
+    card.onclick = () => selectOption(card);
+    card.innerHTML = `
+      <div class="option-letter">${opt.label}</div>
+      <div class="option-text">${opt.text}</div>
+    `;
+    optionsList.appendChild(card);
   });
+
+  // Reset feedback
   document.getElementById('feedbackPanel').classList.remove('show', 'correct', 'incorrect');
   document.getElementById('xpBadge').classList.remove('show');
-  document.getElementById('appContent').scrollTop = 0;
+
+  // Update next button text
+  const nextBtn = document.getElementById('nextBtn');
+  if (quizIndex >= quizQuestions.length - 1) {
+    nextBtn.textContent = '查看结果 See Results →';
+  } else {
+    nextBtn.textContent = '下一题 Next →';
+  }
 }
 
 function exitQuestionView() {
+  quizQuestions = [];
+  quizIndex = 0;
   switchTab(currentTab === 2 ? 0 : (currentTab || 1));
 }
 
-function selectOption(el, isCorrect) {
+function selectOption(el) {
   if (questionAnswered) return;
   questionAnswered = true;
+
+  const q = quizQuestions[quizIndex];
+  const isCorrect = el.getAttribute('data-correct') === 'true';
 
   const options = document.querySelectorAll('.option-card');
   options.forEach(o => o.style.pointerEvents = 'none');
 
   if (isCorrect) {
     el.classList.add('correct');
+    quizCorrect++;
     showFeedback(true);
   } else {
     el.classList.add('incorrect');
+    quizWrong++;
     options.forEach(o => {
       if (o.getAttribute('data-correct') === 'true') {
         o.classList.add('correct');
@@ -1932,11 +2022,21 @@ function selectOption(el, isCorrect) {
 }
 
 function showFeedback(isCorrect) {
+  const q = quizQuestions[quizIndex];
   const panel = document.getElementById('feedbackPanel');
   const banner = document.getElementById('feedbackBanner');
   const xpBadge = document.getElementById('xpBadge');
+  const explanation = document.getElementById('feedbackExplanation');
 
   panel.classList.remove('correct', 'incorrect');
+
+  // Build solution explanation
+  explanation.innerHTML = `
+    <div class="feedback-step"><strong>解析 Solution:</strong></div>
+    <div class="feedback-step" style="padding-left:12px; margin-top:6px;">${q.solution_zh}</div>
+    <div class="feedback-step" style="padding-left:12px; margin-top:6px; font-size:12px; color:var(--text-secondary);">${q.solution_en}</div>
+    <div class="feedback-step" style="margin-top:8px;"><strong>答案 Answer:</strong> ${q.answer} ✅</div>
+  `;
 
   if (isCorrect) {
     panel.classList.add('show', 'correct');
@@ -1960,8 +2060,42 @@ function showFeedback(isCorrect) {
 }
 
 function nextQuestion() {
-  showToast('下一题加载中... Loading next question...');
-  setTimeout(() => showQuestionView(), 600);
+  quizIndex++;
+  if (quizIndex >= quizQuestions.length) {
+    showQuizSummary();
+    return;
+  }
+  questionAnswered = false;
+  document.getElementById('appContent').scrollTop = 0;
+  renderQuestion();
+}
+
+function showQuizSummary() {
+  // Hide question UI elements
+  document.querySelector('.question-header').style.display = 'none';
+  document.querySelector('.question-progress-bar').style.display = 'none';
+  document.getElementById('qTopicTag').style.display = 'none';
+  document.querySelector('.question-box').style.display = 'none';
+  document.getElementById('optionsList').style.display = 'none';
+  document.getElementById('feedbackPanel').classList.remove('show');
+
+  // Show summary
+  const total = quizQuestions.length;
+  const accuracy = total > 0 ? Math.round((quizCorrect / total) * 100) : 0;
+  document.getElementById('summaryCorrect').textContent = quizCorrect;
+  document.getElementById('summaryWrong').textContent = quizWrong;
+  document.getElementById('summaryAccuracy').textContent = accuracy + '%';
+  document.getElementById('quizSummary').style.display = 'block';
+  document.getElementById('appContent').scrollTop = 0;
+
+  // Restore UI for next use
+  setTimeout(() => {
+    document.querySelector('.question-header').style.display = '';
+    document.querySelector('.question-progress-bar').style.display = '';
+    document.getElementById('qTopicTag').style.display = '';
+    document.querySelector('.question-box').style.display = '';
+    document.getElementById('optionsList').style.display = '';
+  }, 100);
 }
 
 // ===== Scan / Camera =====
@@ -2632,12 +2766,19 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
+// ===== Embedded Question Bank (fallback) =====
+const EMBEDDED_QUESTIONS = [{"id":"Q001","topic":"1.1","topicName_zh":"一元二次方程式","topicName_en":"Quadratic Equations","category":"代数","category_en":"Algebra","difficulty":2,"question_zh":"方程式 2x² - 5x + 3 = 0 的两根之和为","question_en":"The sum of the roots of the equation 2x² - 5x + 3 = 0 is","options":[{"label":"A","text":"5"},{"label":"B","text":"5/2"},{"label":"C","text":"3/2"},{"label":"D","text":"-5/2"}],"answer":"B","solution_zh":"根据韦达定理，对于 ax² + bx + c = 0，两根之和 = -b/a = -(-5)/2 = 5/2。","solution_en":"By Vieta's formulas, for ax² + bx + c = 0, sum of roots = -b/a = -(-5)/2 = 5/2.","examType":["uec","midterm","final"],"syllabusRef":"1.1.1"},{"id":"Q002","topic":"1.1","topicName_zh":"一元二次方程式","topicName_en":"Quadratic Equations","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"若方程式 x² + kx + 9 = 0 有相等实根，则 k 的值为","question_en":"If the equation x² + kx + 9 = 0 has equal real roots, the value of k is","options":[{"label":"A","text":"±3"},{"label":"B","text":"±6"},{"label":"C","text":"±9"},{"label":"D","text":"±12"}],"answer":"B","solution_zh":"相等实根表示判别式 Δ = 0。Δ = k² - 4(1)(9) = k² - 36 = 0，所以 k² = 36，k = ±6。","solution_en":"Equal real roots means discriminant Δ = 0. Δ = k² - 4(1)(9) = k² - 36 = 0, so k² = 36, k = ±6.","examType":["uec","midterm","final"],"syllabusRef":"1.1.2"},{"id":"Q003","topic":"1.1","topicName_zh":"一元二次方程式","topicName_en":"Quadratic Equations","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"若方程式 x² - 3x + 1 = 0 的两根为 α 和 β，则 α² + β² 的值为","question_en":"If α and β are the roots of x² - 3x + 1 = 0, then the value of α² + β² is","options":[{"label":"A","text":"5"},{"label":"B","text":"7"},{"label":"C","text":"9"},{"label":"D","text":"11"}],"answer":"B","solution_zh":"由韦达定理：α + β = 3，αβ = 1。α² + β² = (α + β)² - 2αβ = 9 - 2 = 7。","solution_en":"By Vieta's formulas: α + β = 3, αβ = 1. α² + β² = (α + β)² - 2αβ = 9 - 2 = 7.","examType":["uec","midterm","final"],"syllabusRef":"1.1.3"},{"id":"Q004","topic":"1.1","topicName_zh":"一元二次方程式","topicName_en":"Quadratic Equations","category":"代数","category_en":"Algebra","difficulty":2,"question_zh":"方程式 3x² + 7x - 6 = 0 的两根之积为","question_en":"The product of the roots of the equation 3x² + 7x - 6 = 0 is","options":[{"label":"A","text":"2"},{"label":"B","text":"-2"},{"label":"C","text":"7/3"},{"label":"D","text":"-7/3"}],"answer":"B","solution_zh":"根据韦达定理，两根之积 = c/a = -6/3 = -2。","solution_en":"By Vieta's formulas, product of roots = c/a = -6/3 = -2.","examType":["uec","midterm","final"],"syllabusRef":"1.1.1"},{"id":"Q005","topic":"1.1","topicName_zh":"一元二次方程式","topicName_en":"Quadratic Equations","category":"代数","category_en":"Algebra","difficulty":4,"question_zh":"若方程式 2x² - px + q = 0 的两根为 -1 和 3，则 p + q 的值为","question_en":"If the roots of 2x² - px + q = 0 are -1 and 3, the value of p + q is","options":[{"label":"A","text":"-2"},{"label":"B","text":"2"},{"label":"C","text":"-10"},{"label":"D","text":"10"}],"answer":"A","solution_zh":"由韦达定理：p/2 = 2, q/2 = -3, p = 4, q = -6, p + q = -2。","solution_en":"By Vieta's: p/2 = 2, q/2 = -3, p = 4, q = -6, p + q = -2.","examType":["uec"],"syllabusRef":"1.1.3"},{"id":"Q006","topic":"1.2","topicName_zh":"多项式","topicName_en":"Polynomials","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"若 f(x) = 2x³ - 3x² + x - 5，则 f(2) 的值为","question_en":"If f(x) = 2x³ - 3x² + x - 5, then f(2) =","options":[{"label":"A","text":"1"},{"label":"B","text":"-1"},{"label":"C","text":"5"},{"label":"D","text":"-5"}],"answer":"A","solution_zh":"f(2) = 16 - 12 + 2 - 5 = 1。","solution_en":"f(2) = 16 - 12 + 2 - 5 = 1.","examType":["uec","midterm","final"],"syllabusRef":"1.2.1"},{"id":"Q007","topic":"1.2","topicName_zh":"多项式","topicName_en":"Polynomials","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"多项式 f(x) = x³ - 2x² - 5x + 6 除以 (x - 1) 的余数为","question_en":"The remainder when f(x) = x³ - 2x² - 5x + 6 is divided by (x - 1) is","options":[{"label":"A","text":"0"},{"label":"B","text":"1"},{"label":"C","text":"-1"},{"label":"D","text":"6"}],"answer":"A","solution_zh":"f(1) = 1 - 2 - 5 + 6 = 0。","solution_en":"f(1) = 1 - 2 - 5 + 6 = 0.","examType":["uec","midterm","final"],"syllabusRef":"1.2.2"},{"id":"Q008","topic":"1.2","topicName_zh":"多项式","topicName_en":"Polynomials","category":"代数","category_en":"Algebra","difficulty":4,"question_zh":"若 (x + 2) 是 f(x) = x³ + ax² - x - 6 的因式，则 a 的值为","question_en":"If (x + 2) is a factor of f(x) = x³ + ax² - x - 6, the value of a is","options":[{"label":"A","text":"1"},{"label":"B","text":"2"},{"label":"C","text":"3"},{"label":"D","text":"4"}],"answer":"C","solution_zh":"f(-2) = -8 + 4a + 2 - 6 = 4a - 12 = 0, a = 3。","solution_en":"f(-2) = -8 + 4a + 2 - 6 = 4a - 12 = 0, a = 3.","examType":["uec"],"syllabusRef":"1.2.2"},{"id":"Q009","topic":"1.2","topicName_zh":"多项式","topicName_en":"Polynomials","category":"代数","category_en":"Algebra","difficulty":4,"question_zh":"多项式 4x³ - 4x² - 5x + 3 分解因式后为","question_en":"The factorization of 4x³ - 4x² - 5x + 3 is","options":[{"label":"A","text":"(x - 1)(2x + 1)(2x - 3)"},{"label":"B","text":"(x - 1)(2x - 1)(2x + 3)"},{"label":"C","text":"(x + 1)(2x - 1)(2x - 3)"},{"label":"D","text":"(x + 1)(4x² - 8x + 3)"}],"answer":"C","solution_zh":"f(-1) = 0, 除以(x+1)得4x²-8x+3=(2x-1)(2x-3)。","solution_en":"f(-1) = 0, divide by (x+1) to get 4x²-8x+3 = (2x-1)(2x-3).","examType":["uec"],"syllabusRef":"1.2.3"},{"id":"Q010","topic":"1.3","topicName_zh":"有理式","topicName_en":"Rational Expressions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"化简 (x² - 4)/(x² - x - 2) 的结果为","question_en":"Simplify (x² - 4)/(x² - x - 2)","options":[{"label":"A","text":"(x + 2)/(x + 1)"},{"label":"B","text":"(x - 2)/(x + 1)"},{"label":"C","text":"(x + 2)/(x - 2)"},{"label":"D","text":"(x - 2)/(x - 1)"}],"answer":"A","solution_zh":"(x+2)(x-2)/[(x-2)(x+1)] = (x+2)/(x+1)。","solution_en":"(x+2)(x-2)/[(x-2)(x+1)] = (x+2)/(x+1).","examType":["uec","midterm","final"],"syllabusRef":"1.3.1"},{"id":"Q011","topic":"1.3","topicName_zh":"有理式","topicName_en":"Rational Expressions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"解方程 2/(x-1) + 3/(x+1) = 1，x 的值为","question_en":"Solve 2/(x-1) + 3/(x+1) = 1","options":[{"label":"A","text":"x = 0 或 x = 5"},{"label":"B","text":"x = 1 或 x = -5"},{"label":"C","text":"x = -1 或 x = 6"},{"label":"D","text":"x = 0 或 x = -5"}],"answer":"A","solution_zh":"x² - 5x = 0, x(x-5) = 0, x = 0 或 5。","solution_en":"x² - 5x = 0, x = 0 or 5.","examType":["uec","midterm"],"syllabusRef":"1.3.2"},{"id":"Q012","topic":"1.3","topicName_zh":"有理式","topicName_en":"Rational Expressions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"化简 1/(x+1) + 1/(x-1) 的结果为","question_en":"Simplify 1/(x+1) + 1/(x-1)","options":[{"label":"A","text":"2/(x²-1)"},{"label":"B","text":"2x/(x²-1)"},{"label":"C","text":"(x+1)/(x-1)"},{"label":"D","text":"2/(2x)"}],"answer":"B","solution_zh":"[(x-1)+(x+1)]/[(x+1)(x-1)] = 2x/(x²-1)。","solution_en":"[(x-1)+(x+1)]/[(x+1)(x-1)] = 2x/(x²-1).","examType":["uec","midterm","final"],"syllabusRef":"1.3.1"},{"id":"Q013","topic":"1.4","topicName_zh":"无理式","topicName_en":"Irrational Expressions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"化简 √(16 - 6√7) 的结果为","question_en":"Simplify √(16 - 6√7)","options":[{"label":"A","text":"3 - √7"},{"label":"B","text":"√7 - 3"},{"label":"C","text":"3 + √7"},{"label":"D","text":"4 - √7"}],"answer":"A","solution_zh":"a+b=16, ab=63, a=9, b=7, √9-√7 = 3-√7。","solution_en":"a+b=16, ab=63, a=9, b=7, √9-√7 = 3-√7.","examType":["uec"],"syllabusRef":"1.4.1"},{"id":"Q014","topic":"1.4","topicName_zh":"无理式","topicName_en":"Irrational Expressions","category":"代数","category_en":"Algebra","difficulty":2,"question_zh":"有理化 1/(√5 - √3) 的结果为","question_en":"Rationalize 1/(√5 - √3)","options":[{"label":"A","text":"(√5 + √3)/2"},{"label":"B","text":"(√5 - √3)/2"},{"label":"C","text":"(√5 + √3)/8"},{"label":"D","text":"√5 + √3"}],"answer":"A","solution_zh":"乘以(√5+√3)/(√5+√3) = (√5+√3)/(5-3) = (√5+√3)/2。","solution_en":"Multiply by conjugate: (√5+√3)/(5-3) = (√5+√3)/2.","examType":["uec","midterm","final"],"syllabusRef":"1.4.2"},{"id":"Q015","topic":"1.4","topicName_zh":"无理式","topicName_en":"Irrational Expressions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"化简 (√3 + √2)² - (√3 - √2)² 的结果为","question_en":"Simplify (√3 + √2)² - (√3 - √2)²","options":[{"label":"A","text":"2√6"},{"label":"B","text":"4√6"},{"label":"C","text":"10"},{"label":"D","text":"2"}],"answer":"B","solution_zh":"(a+b)(a-b) = 2√3·2√2 = 4√6。","solution_en":"(a+b)(a-b) = 2√3·2√2 = 4√6.","examType":["uec","midterm","final"],"syllabusRef":"1.4.1"},{"id":"Q016","topic":"1.5","topicName_zh":"数列与级数","topicName_en":"Sequences and Series","category":"代数","category_en":"Algebra","difficulty":2,"question_zh":"等差数列的首项为 5，公差为 3，则第 10 项为","question_en":"An arithmetic sequence has first term 5 and common difference 3. The 10th term is","options":[{"label":"A","text":"30"},{"label":"B","text":"32"},{"label":"C","text":"35"},{"label":"D","text":"27"}],"answer":"B","solution_zh":"a₁₀ = 5 + 9(3) = 32。","solution_en":"a₁₀ = 5 + 9(3) = 32.","examType":["uec","midterm","final"],"syllabusRef":"1.5.1"},{"id":"Q017","topic":"1.5","topicName_zh":"数列与级数","topicName_en":"Sequences and Series","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"某人每月储蓄 RM500，以后每月增加 RM50，则前 12 个月共储蓄","question_en":"A person saves RM500 first month, increases by RM50 each month. Total for 12 months is","options":[{"label":"A","text":"RM9000"},{"label":"B","text":"RM9300"},{"label":"C","text":"RM9900"},{"label":"D","text":"RM6000"}],"answer":"B","solution_zh":"S₁₂ = 6[1000+550] = 9300。","solution_en":"S₁₂ = 6[1000+550] = 9300.","examType":["uec"],"syllabusRef":"1.5.2"},{"id":"Q018","topic":"1.5","topicName_zh":"数列与级数","topicName_en":"Sequences and Series","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"等比数列 2, 6, 18, ... 的第 6 项为","question_en":"The 6th term of the geometric sequence 2, 6, 18, ... is","options":[{"label":"A","text":"162"},{"label":"B","text":"486"},{"label":"C","text":"729"},{"label":"D","text":"1458"}],"answer":"B","solution_zh":"r = 3, ar⁵ = 2×243 = 486。","solution_en":"r = 3, ar⁵ = 2×243 = 486.","examType":["uec","midterm","final"],"syllabusRef":"1.5.3"},{"id":"Q019","topic":"1.5","topicName_zh":"数列与级数","topicName_en":"Sequences and Series","category":"代数","category_en":"Algebra","difficulty":4,"question_zh":"等比级数 1 + 1/2 + 1/4 + ... 的无穷级数和为","question_en":"Sum to infinity of 1 + 1/2 + 1/4 + ... is","options":[{"label":"A","text":"3/2"},{"label":"B","text":"2"},{"label":"C","text":"5/2"},{"label":"D","text":"无穷大"}],"answer":"B","solution_zh":"S∞ = 1/(1-1/2) = 2。","solution_en":"S∞ = 1/(1-1/2) = 2.","examType":["uec","midterm","final"],"syllabusRef":"1.5.4"},{"id":"Q020","topic":"1.6","topicName_zh":"矩阵与行列式","topicName_en":"Matrices and Determinants","category":"代数","category_en":"Algebra","difficulty":2,"question_zh":"矩阵 A = [[3,1],[2,4]] 的行列式为","question_en":"Determinant of A = [[3,1],[2,4]] is","options":[{"label":"A","text":"10"},{"label":"B","text":"14"},{"label":"C","text":"12"},{"label":"D","text":"-10"}],"answer":"A","solution_zh":"3(4)-1(2) = 10。","solution_en":"3(4)-1(2) = 10.","examType":["uec","midterm","final"],"syllabusRef":"1.6.1"},{"id":"Q021","topic":"1.6","topicName_zh":"矩阵与行列式","topicName_en":"Matrices and Determinants","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"矩阵 A = [[2,3],[1,2]] 的逆矩阵为","question_en":"Inverse of A = [[2,3],[1,2]] is","options":[{"label":"A","text":"[[2,-3],[-1,2]]"},{"label":"B","text":"[[2,-3],[1,-2]]"},{"label":"C","text":"[[-2,3],[1,-2]]"},{"label":"D","text":"[[2,3],[-1,2]]"}],"answer":"A","solution_zh":"|A|=1, A⁻¹=[[2,-3],[-1,2]]。","solution_en":"|A|=1, A⁻¹=[[2,-3],[-1,2]].","examType":["uec","midterm","final"],"syllabusRef":"1.6.2"},{"id":"Q022","topic":"1.6","topicName_zh":"矩阵与行列式","topicName_en":"Matrices and Determinants","category":"代数","category_en":"Algebra","difficulty":4,"question_zh":"用克莱姆法则解 2x+y=5, x+3y=10，x =","question_en":"Using Cramer's rule: 2x+y=5, x+3y=10, x =","options":[{"label":"A","text":"1"},{"label":"B","text":"2"},{"label":"C","text":"3"},{"label":"D","text":"-1"}],"answer":"A","solution_zh":"D=5, Dₓ=5, x=1。","solution_en":"D=5, Dₓ=5, x=1.","examType":["uec"],"syllabusRef":"1.6.3"},{"id":"Q023","topic":"1.6","topicName_zh":"矩阵与行列式","topicName_en":"Matrices and Determinants","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"若 A=[[a,2],[-2,-a]] 且 A²=O，则 a =","question_en":"If A=[[a,2],[-2,-a]] and A²=O, then a =","options":[{"label":"A","text":"±1"},{"label":"B","text":"±2"},{"label":"C","text":"0"},{"label":"D","text":"±4"}],"answer":"B","solution_zh":"a²-4=0, a=±2。","solution_en":"a²-4=0, a=±2.","examType":["uec"],"syllabusRef":"1.6.2"},{"id":"Q024","topic":"1.7","topicName_zh":"联立方程式","topicName_en":"Simultaneous Equations","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"r+y=30, b+y=20, r+b=40，则 r =","question_en":"r+y=30, b+y=20, r+b=40, r =","options":[{"label":"A","text":"20"},{"label":"B","text":"25"},{"label":"C","text":"15"},{"label":"D","text":"30"}],"answer":"B","solution_zh":"r+b+y=45, r=45-20=25。","solution_en":"r+b+y=45, r=45-20=25.","examType":["uec"],"syllabusRef":"1.7.1"},{"id":"Q025","topic":"1.7","topicName_zh":"联立方程式","topicName_en":"Simultaneous Equations","category":"代数","category_en":"Algebra","difficulty":4,"question_zh":"y=x+1 和 y=x²-x-2 的解中 x 正值为","question_en":"y=x+1 and y=x²-x-2, positive x =","options":[{"label":"A","text":"1"},{"label":"B","text":"2"},{"label":"C","text":"3"},{"label":"D","text":"4"}],"answer":"C","solution_zh":"x²-2x-3=0, (x-3)(x+1)=0, x=3。","solution_en":"x²-2x-3=0, x=3.","examType":["uec"],"syllabusRef":"1.7.2"},{"id":"Q026","topic":"1.7","topicName_zh":"联立方程式","topicName_en":"Simultaneous Equations","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"2x+3y=12, x-y=1，x+y =","question_en":"2x+3y=12, x-y=1, x+y =","options":[{"label":"A","text":"5"},{"label":"B","text":"6"},{"label":"C","text":"7"},{"label":"D","text":"8"}],"answer":"A","solution_zh":"x=3, y=2, x+y=5。","solution_en":"x=3, y=2, x+y=5.","examType":["uec","midterm","final"],"syllabusRef":"1.7.1"},{"id":"Q027","topic":"1.8","topicName_zh":"不等式","topicName_en":"Inequalities","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"x²-5x+6<0 的解集为","question_en":"Solve x²-5x+6<0","options":[{"label":"A","text":"x<2 或 x>3"},{"label":"B","text":"2<x<3"},{"label":"C","text":"x<-2 或 x>-3"},{"label":"D","text":"-3<x<-2"}],"answer":"B","solution_zh":"(x-2)(x-3)<0, 2<x<3。","solution_en":"(x-2)(x-3)<0, 2<x<3.","examType":["uec","midterm","final"],"syllabusRef":"1.8.1"},{"id":"Q028","topic":"1.8","topicName_zh":"不等式","topicName_en":"Inequalities","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"(x+1)(x-4)≥0 的解集为","question_en":"Solution of (x+1)(x-4)≥0","options":[{"label":"A","text":"-1≤x≤4"},{"label":"B","text":"x≤-1 或 x≥4"},{"label":"C","text":"x<-1 或 x>4"},{"label":"D","text":"-1<x<4"}],"answer":"B","solution_zh":"x≤-1 或 x≥4。","solution_en":"x≤-1 or x≥4.","examType":["uec","midterm","final"],"syllabusRef":"1.8.1"},{"id":"Q029","topic":"1.8","topicName_zh":"不等式","topicName_en":"Inequalities","category":"代数","category_en":"Algebra","difficulty":2,"question_zh":"2x-3<7 且 x+1>0，x 的范围为","question_en":"If 2x-3<7 and x+1>0, range of x is","options":[{"label":"A","text":"-1<x<5"},{"label":"B","text":"0<x<5"},{"label":"C","text":"-1<x<7"},{"label":"D","text":"x<5"}],"answer":"A","solution_zh":"x<5 且 x>-1。","solution_en":"x<5 and x>-1.","examType":["uec","midterm","final"],"syllabusRef":"1.8.2"},{"id":"Q030","topic":"1.9","topicName_zh":"函数","topicName_en":"Functions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"f(x)=√(x-2) 的定义域为","question_en":"Domain of f(x)=√(x-2) is","options":[{"label":"A","text":"x>2"},{"label":"B","text":"x≥2"},{"label":"C","text":"x≠2"},{"label":"D","text":"所有实数"}],"answer":"B","solution_zh":"x-2≥0, x≥2。","solution_en":"x-2≥0, x≥2.","examType":["uec","midterm","final"],"syllabusRef":"1.9.1"},{"id":"Q031","topic":"1.9","topicName_zh":"函数","topicName_en":"Functions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"f(x)=2x+1, g(x)=x², f(g(2)) =","question_en":"f(x)=2x+1, g(x)=x², f(g(2)) =","options":[{"label":"A","text":"9"},{"label":"B","text":"25"},{"label":"C","text":"10"},{"label":"D","text":"17"}],"answer":"A","solution_zh":"g(2)=4, f(4)=9。","solution_en":"g(2)=4, f(4)=9.","examType":["uec","midterm","final"],"syllabusRef":"1.9.2"},{"id":"Q032","topic":"1.9","topicName_zh":"函数","topicName_en":"Functions","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"f(x)=x²-4x+5 的最小值为","question_en":"Minimum of f(x)=x²-4x+5 is","options":[{"label":"A","text":"0"},{"label":"B","text":"1"},{"label":"C","text":"5"},{"label":"D","text":"-1"}],"answer":"B","solution_zh":"(x-2)²+1, 最小值1。","solution_en":"(x-2)²+1, minimum is 1.","examType":["uec","midterm","final"],"syllabusRef":"1.9.1"},{"id":"Q033","topic":"1.10","topicName_zh":"指数与对数","topicName_en":"Exponentials and Logarithms","category":"代数","category_en":"Algebra","difficulty":2,"question_zh":"log₂ 32 =","question_en":"log₂ 32 =","options":[{"label":"A","text":"4"},{"label":"B","text":"5"},{"label":"C","text":"6"},{"label":"D","text":"16"}],"answer":"B","solution_zh":"2⁵=32, log₂32=5。","solution_en":"2⁵=32, log₂32=5.","examType":["uec","midterm","final"],"syllabusRef":"1.10.1"},{"id":"Q034","topic":"1.10","topicName_zh":"指数与对数","topicName_en":"Exponentials and Logarithms","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"log₃27 + log₃9 - log₃3 =","question_en":"log₃27 + log₃9 - log₃3 =","options":[{"label":"A","text":"3"},{"label":"B","text":"4"},{"label":"C","text":"5"},{"label":"D","text":"6"}],"answer":"B","solution_zh":"3+2-1=4。","solution_en":"3+2-1=4.","examType":["uec","midterm","final"],"syllabusRef":"1.10.2"},{"id":"Q035","topic":"1.10","topicName_zh":"指数与对数","topicName_en":"Exponentials and Logarithms","category":"代数","category_en":"Algebra","difficulty":4,"question_zh":"3ˣ⁺¹=27ˣ⁻¹, x =","question_en":"Solve 3ˣ⁺¹=27ˣ⁻¹, x =","options":[{"label":"A","text":"1"},{"label":"B","text":"2"},{"label":"C","text":"3"},{"label":"D","text":"4"}],"answer":"B","solution_zh":"x+1=3x-3, x=2。","solution_en":"x+1=3x-3, x=2.","examType":["uec"],"syllabusRef":"1.10.3"},{"id":"Q036","topic":"1.10","topicName_zh":"指数与对数","topicName_en":"Exponentials and Logarithms","category":"代数","category_en":"Algebra","difficulty":3,"question_zh":"log₄8 =","question_en":"log₄8 =","options":[{"label":"A","text":"2"},{"label":"B","text":"3/2"},{"label":"C","text":"4/3"},{"label":"D","text":"2/3"}],"answer":"B","solution_zh":"log₂8/log₂4 = 3/2。","solution_en":"log₂8/log₂4 = 3/2.","examType":["uec","midterm","final"],"syllabusRef":"1.10.2"},{"id":"Q037","topic":"2.1","topicName_zh":"三角函数","topicName_en":"Trigonometric Functions","category":"三角学","category_en":"Trigonometry","difficulty":2,"question_zh":"sin30°+cos60° =","question_en":"sin30°+cos60° =","options":[{"label":"A","text":"0"},{"label":"B","text":"1/2"},{"label":"C","text":"1"},{"label":"D","text":"√3/2"}],"answer":"C","solution_zh":"1/2+1/2=1。","solution_en":"1/2+1/2=1.","examType":["uec","midterm","final"],"syllabusRef":"2.1.1"},{"id":"Q038","topic":"2.1","topicName_zh":"三角函数","topicName_en":"Trigonometric Functions","category":"三角学","category_en":"Trigonometry","difficulty":3,"question_zh":"sinθ=3/5, θ在第二象限, cosθ=","question_en":"sinθ=3/5, θ in Q2, cosθ=","options":[{"label":"A","text":"4/5"},{"label":"B","text":"-4/5"},{"label":"C","text":"3/4"},{"label":"D","text":"-3/4"}],"answer":"B","solution_zh":"cos²θ=16/25, Q2中cosθ<0, cosθ=-4/5。","solution_en":"cos²θ=16/25, in Q2 cosθ<0, cosθ=-4/5.","examType":["uec","midterm","final"],"syllabusRef":"2.1.2"},{"id":"Q039","topic":"2.2","topicName_zh":"三角恒等式","topicName_en":"Trigonometric Identities","category":"三角学","category_en":"Trigonometry","difficulty":3,"question_zh":"化简 (1-sin²θ)/cosθ =","question_en":"Simplify (1-sin²θ)/cosθ =","options":[{"label":"A","text":"sinθ"},{"label":"B","text":"cosθ"},{"label":"C","text":"tanθ"},{"label":"D","text":"secθ"}],"answer":"B","solution_zh":"cos²θ/cosθ=cosθ。","solution_en":"cos²θ/cosθ=cosθ.","examType":["uec","midterm","final"],"syllabusRef":"2.2.1"},{"id":"Q040","topic":"2.2","topicName_zh":"三角恒等式","topicName_en":"Trigonometric Identities","category":"三角学","category_en":"Trigonometry","difficulty":4,"question_zh":"若 cosec10°=k, cot280° =","question_en":"If cosec10°=k, cot280° =","options":[{"label":"A","text":"-1/√(k²-1)"},{"label":"B","text":"1/√(k²-1)"},{"label":"C","text":"-√(k²-1)"},{"label":"D","text":"√(k²-1)"}],"answer":"C","solution_zh":"cot280°=-tan10°=-1/√(k²-1)。","solution_en":"cot280°=-tan10°=-1/√(k²-1).","examType":["uec"],"syllabusRef":"2.2.2"},{"id":"Q041","topic":"2.3","topicName_zh":"任意三角形解法","topicName_en":"Solving Triangles","category":"三角学","category_en":"Trigonometry","difficulty":3,"question_zh":"△ABC, a=7, b=8, C=60°, c=","question_en":"△ABC, a=7, b=8, C=60°, c=","options":[{"label":"A","text":"√57"},{"label":"B","text":"√53"},{"label":"C","text":"√65"},{"label":"D","text":"√113"}],"answer":"A","solution_zh":"c²=49+64-56=57, c=√57。","solution_en":"c²=49+64-56=57, c=√57.","examType":["uec","midterm","final"],"syllabusRef":"2.3.1"},{"id":"Q042","topic":"2.3","topicName_zh":"任意三角形解法","topicName_en":"Solving Triangles","category":"三角学","category_en":"Trigonometry","difficulty":3,"question_zh":"两边5和8，夹角30°，面积=","question_en":"Two sides 5 and 8, included angle 30°, area=","options":[{"label":"A","text":"10"},{"label":"B","text":"20"},{"label":"C","text":"10√3"},{"label":"D","text":"20√3"}],"answer":"A","solution_zh":"(1/2)(5)(8)(1/2)=10。","solution_en":"(1/2)(5)(8)(1/2)=10.","examType":["uec","midterm","final"],"syllabusRef":"2.3.2"},{"id":"Q043","topic":"2.3","topicName_zh":"任意三角形解法","topicName_en":"Solving Triangles","category":"三角学","category_en":"Trigonometry","difficulty":3,"question_zh":"a=6, A=30°, B=45°, b=","question_en":"a=6, A=30°, B=45°, b=","options":[{"label":"A","text":"6√2"},{"label":"B","text":"3√2"},{"label":"C","text":"6/√2"},{"label":"D","text":"3"}],"answer":"A","solution_zh":"b=6sin45°/sin30°=6√2。","solution_en":"b=6sin45°/sin30°=6√2.","examType":["uec","midterm","final"],"syllabusRef":"2.3.1"},{"id":"Q044","topic":"3.1","topicName_zh":"直角坐标系与多边形面积","topicName_en":"Cartesian Coordinates and Polygon Area","category":"解析几何","category_en":"Analytical Geometry","difficulty":2,"question_zh":"A(1,3) B(5,7) 距离=","question_en":"Distance A(1,3) B(5,7)=","options":[{"label":"A","text":"4"},{"label":"B","text":"4√2"},{"label":"C","text":"8"},{"label":"D","text":"2√2"}],"answer":"B","solution_zh":"√(16+16)=4√2。","solution_en":"√(16+16)=4√2.","examType":["uec","midterm","final"],"syllabusRef":"3.1.1"},{"id":"Q045","topic":"3.1","topicName_zh":"直角坐标系与多边形面积","topicName_en":"Cartesian Coordinates and Polygon Area","category":"解析几何","category_en":"Analytical Geometry","difficulty":3,"question_zh":"A(0,0) B(6,0) C(0,8) 面积=","question_en":"Triangle A(0,0) B(6,0) C(0,8), area=","options":[{"label":"A","text":"48"},{"label":"B","text":"24"},{"label":"C","text":"14"},{"label":"D","text":"10"}],"answer":"B","solution_zh":"(1/2)(6)(8)=24。","solution_en":"(1/2)(6)(8)=24.","examType":["uec","midterm","final"],"syllabusRef":"3.1.2"},{"id":"Q046","topic":"3.2","topicName_zh":"直线","topicName_en":"Straight Lines","category":"解析几何","category_en":"Analytical Geometry","difficulty":2,"question_zh":"过(2,3)斜率-1的直线方程","question_en":"Line through (2,3) slope -1","options":[{"label":"A","text":"y=-x+5"},{"label":"B","text":"y=-x+1"},{"label":"C","text":"y=x+1"},{"label":"D","text":"y=-x-5"}],"answer":"A","solution_zh":"y-3=-(x-2), y=-x+5。","solution_en":"y-3=-(x-2), y=-x+5.","examType":["uec","midterm","final"],"syllabusRef":"3.2.1"},{"id":"Q047","topic":"3.2","topicName_zh":"直线","topicName_en":"Straight Lines","category":"解析几何","category_en":"Analytical Geometry","difficulty":3,"question_zh":"y=2x+1 和 y=kx-3 垂直, k=","question_en":"y=2x+1 and y=kx-3 perpendicular, k=","options":[{"label":"A","text":"-2"},{"label":"B","text":"1/2"},{"label":"C","text":"-1/2"},{"label":"D","text":"2"}],"answer":"C","solution_zh":"2k=-1, k=-1/2。","solution_en":"2k=-1, k=-1/2.","examType":["uec","midterm","final"],"syllabusRef":"3.2.2"},{"id":"Q048","topic":"3.2","topicName_zh":"直线","topicName_en":"Straight Lines","category":"解析几何","category_en":"Analytical Geometry","difficulty":4,"question_zh":"y=2x+k 和 y=-x+3 交于y轴, k=","question_en":"y=2x+k and y=-x+3 intersect on y-axis, k=","options":[{"label":"A","text":"1"},{"label":"B","text":"2"},{"label":"C","text":"3"},{"label":"D","text":"-3"}],"answer":"C","solution_zh":"x=0时y=3, k=3。","solution_en":"x=0, y=3, k=3.","examType":["uec"],"syllabusRef":"3.2.3"},{"id":"Q049","topic":"3.1","topicName_zh":"直角坐标系与多边形面积","topicName_en":"Cartesian Coordinates and Polygon Area","category":"解析几何","category_en":"Analytical Geometry","difficulty":3,"question_zh":"A(2,5) B(8,1) 中点=","question_en":"Midpoint of A(2,5) B(8,1)=","options":[{"label":"A","text":"(5,3)"},{"label":"B","text":"(3,5)"},{"label":"C","text":"(10,6)"},{"label":"D","text":"(6,4)"}],"answer":"A","solution_zh":"(10/2,6/2)=(5,3)。","solution_en":"(10/2,6/2)=(5,3).","examType":["uec","midterm","final"],"syllabusRef":"3.1.1"},{"id":"Q050","topic":"3.2","topicName_zh":"直线","topicName_en":"Straight Lines","category":"解析几何","category_en":"Analytical Geometry","difficulty":3,"question_zh":"P(k,5) 在 2x-y+1=0 上, k=","question_en":"P(k,5) on 2x-y+1=0, k=","options":[{"label":"A","text":"1"},{"label":"B","text":"2"},{"label":"C","text":"3"},{"label":"D","text":"-2"}],"answer":"B","solution_zh":"2k-5+1=0, k=2。","solution_en":"2k-4=0, k=2.","examType":["uec","midterm","final"],"syllabusRef":"3.2.1"},{"id":"Q051","topic":"4.1","topicName_zh":"统计学","topicName_en":"Statistics","category":"统计与概率","category_en":"Statistics & Probability","difficulty":2,"question_zh":"3,5,7,9,11 的中位数=","question_en":"Median of 3,5,7,9,11=","options":[{"label":"A","text":"5"},{"label":"B","text":"7"},{"label":"C","text":"9"},{"label":"D","text":"35"}],"answer":"B","solution_zh":"第3个=7。","solution_en":"3rd value=7.","examType":["uec","midterm","final"],"syllabusRef":"4.1.1"},{"id":"Q052","topic":"4.1","topicName_zh":"统计学","topicName_en":"Statistics","category":"统计与概率","category_en":"Statistics & Probability","difficulty":3,"question_zh":"2,4,6,8,10 的方差=","question_en":"Variance of 2,4,6,8,10=","options":[{"label":"A","text":"4"},{"label":"B","text":"6"},{"label":"C","text":"8"},{"label":"D","text":"10"}],"answer":"C","solution_zh":"均值6, 方差=40/5=8。","solution_en":"Mean 6, variance=40/5=8.","examType":["uec","midterm","final"],"syllabusRef":"4.1.2"},{"id":"Q053","topic":"4.2","topicName_zh":"概率","topicName_en":"Probability","category":"统计与概率","category_en":"Statistics & Probability","difficulty":3,"question_zh":"4红6蓝取2球，两红概率=","question_en":"4 red 6 blue, draw 2, P(both red)=","options":[{"label":"A","text":"2/15"},{"label":"B","text":"4/15"},{"label":"C","text":"1/15"},{"label":"D","text":"4/25"}],"answer":"A","solution_zh":"C(4,2)/C(10,2)=6/45=2/15。","solution_en":"C(4,2)/C(10,2)=6/45=2/15.","examType":["uec","midterm","final"],"syllabusRef":"4.2.1"},{"id":"Q054","topic":"4.1","topicName_zh":"统计学","topicName_en":"Statistics","category":"统计与概率","category_en":"Statistics & Probability","difficulty":3,"question_zh":"均值50标准差5，每个+10后新均值和标准差","question_en":"Mean 50, SD 5, add 10 to each: new mean and SD","options":[{"label":"A","text":"60 和 15"},{"label":"B","text":"60 和 5"},{"label":"C","text":"50 和 15"},{"label":"D","text":"50 和 5"}],"answer":"B","solution_zh":"新均值60, 标准差不变=5。","solution_en":"New mean 60, SD unchanged=5.","examType":["uec","midterm","final"],"syllabusRef":"4.1.3"},{"id":"Q055","topic":"5.1","topicName_zh":"微分法","topicName_en":"Differentiation","category":"微积分","category_en":"Calculus","difficulty":2,"question_zh":"f(x)=3x⁴-2x²+5, f'(x)=","question_en":"f(x)=3x⁴-2x²+5, f'(x)=","options":[{"label":"A","text":"12x³-4x"},{"label":"B","text":"12x³-2x"},{"label":"C","text":"12x³-4x+5"},{"label":"D","text":"3x³-2x"}],"answer":"A","solution_zh":"12x³-4x。","solution_en":"12x³-4x.","examType":["uec","midterm","final"],"syllabusRef":"5.1.1"},{"id":"Q056","topic":"5.2","topicName_zh":"微分法的应用","topicName_en":"Applications of Differentiation","category":"微积分","category_en":"Calculus","difficulty":3,"question_zh":"y=x²-4x+3 在 x=-1 的切线斜率=","question_en":"Slope of tangent to y=x²-4x+3 at x=-1","options":[{"label":"A","text":"-2"},{"label":"B","text":"-6"},{"label":"C","text":"2"},{"label":"D","text":"6"}],"answer":"B","solution_zh":"y'=2x-4, y'(-1)=-6。","solution_en":"y'=2x-4, y'(-1)=-6.","examType":["uec","midterm","final"],"syllabusRef":"5.2.1"},{"id":"Q057","topic":"5.2","topicName_zh":"微分法的应用","topicName_en":"Applications of Differentiation","category":"微积分","category_en":"Calculus","difficulty":4,"question_zh":"f(x)=x³-3x 在 x=1 处有","question_en":"f(x)=x³-3x at x=1 has","options":[{"label":"A","text":"极大值 -2"},{"label":"B","text":"极小值 -2"},{"label":"C","text":"极大值 2"},{"label":"D","text":"极小值 2"}],"answer":"B","solution_zh":"f''(1)=6>0, 极小值f(1)=-2。","solution_en":"f''(1)=6>0, local min f(1)=-2.","examType":["uec","midterm","final"],"syllabusRef":"5.2.2"},{"id":"Q058","topic":"5.3","topicName_zh":"不定积分","topicName_en":"Indefinite Integrals","category":"微积分","category_en":"Calculus","difficulty":2,"question_zh":"∫(6x²+4x-1)dx =","question_en":"∫(6x²+4x-1)dx =","options":[{"label":"A","text":"2x³+2x²-x+C"},{"label":"B","text":"2x³+4x²-x+C"},{"label":"C","text":"6x³+2x²-x+C"},{"label":"D","text":"2x³+2x²+C"}],"answer":"A","solution_zh":"2x³+2x²-x+C。","solution_en":"2x³+2x²-x+C.","examType":["uec","midterm","final"],"syllabusRef":"5.3.1"},{"id":"Q059","topic":"5.4","topicName_zh":"定积分及其应用","topicName_en":"Definite Integrals and Applications","category":"微积分","category_en":"Calculus","difficulty":3,"question_zh":"∫₀²(3x²+1)dx =","question_en":"∫₀²(3x²+1)dx =","options":[{"label":"A","text":"8"},{"label":"B","text":"10"},{"label":"C","text":"12"},{"label":"D","text":"14"}],"answer":"B","solution_zh":"[x³+x]₀²=10。","solution_en":"[x³+x]₀²=10.","examType":["uec","midterm","final"],"syllabusRef":"5.4.1"},{"id":"Q060","topic":"5.4","topicName_zh":"定积分及其应用","topicName_en":"Definite Integrals and Applications","category":"微积分","category_en":"Calculus","difficulty":4,"question_zh":"y=x² 和 y=2x 围成面积=","question_en":"Area bounded by y=x² and y=2x","options":[{"label":"A","text":"1/3"},{"label":"B","text":"2/3"},{"label":"C","text":"4/3"},{"label":"D","text":"8/3"}],"answer":"C","solution_zh":"∫₀²(2x-x²)dx=4/3。","solution_en":"∫₀²(2x-x²)dx=4/3.","examType":["uec","midterm","final"],"syllabusRef":"5.4.2"}];
+
 // ===== Init =====
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Set initial timer circle
   const circumference = 2 * Math.PI * 64;
   document.getElementById('timerCircleFg').setAttribute('stroke-dasharray', String(circumference));
   document.getElementById('timerCircleFg').setAttribute('stroke-dashoffset', '0');
+
+  // Load question bank and build topic grid
+  await loadQuestionBank();
+  buildTopicGrid();
 
   // Initialize Three.js forest scene
   initForestScene();
